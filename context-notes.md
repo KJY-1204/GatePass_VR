@@ -23,16 +23,35 @@
   완전 초기 상태 — 이번이 CLAUDE.md §29 First Session Bootstrap에 해당하는
   첫 세션.
 
+## 2026-09-04 — `_GatePassVR` 폴더 구조 생성
+
+- **결정**: `Assets/_GatePassVR` 하위에 CLAUDE.md §15 구조(Scenes, Scripts/Core·VR·
+  Interaction·Guidance·UI·Editor, Prefabs/VR·Interaction·UI·Environment, Data,
+  Audio, Art/Temp, Tests/EditMode·PlayMode)를 생성. 각 빈 폴더에 `.gitkeep`
+  파일을 넣음.
+  - **이유**: Git은 빈 디렉터리를 추적하지 않으므로 `.gitkeep`으로 구조를
+    먼저 고정. `.meta` 파일은 Unity Editor가 다음에 이 프로젝트를 열 때
+    자동 생성되므로 지금은 만들지 않음 (Unity를 거치지 않고 파일시스템에서만
+    작업했기 때문).
+  - **주의**: 다음에 Unity Editor로 이 프로젝트를 열면 새 폴더마다 `.meta`
+    파일이 자동 생성된다. 그 변경은 별도로 커밋해야 함 (Unity가 생성한
+    `.meta`는 무시하지 말고 추적 대상).
+- **작업 방식**: `feature/kim-project-structure` 브랜치를 `develop`에서 분기해
+  작업. 사용자가 git 브랜치 작업에 익숙하지 않아 브랜치 생성·커밋·develop
+  병합까지 에이전트가 대신 처리함. 이후에도 같은 패턴(브랜치 생성 → 작업 →
+  커밋 → develop 병합 → push)을 기본으로 진행.
+
 ## 다음 세션이 알아야 할 것
 
 - `plan.md`, `checklist.md`는 이번에 처음 생성됨. Phase A 항목 중 Git/GitHub
-  설정만 완료 상태이고, 나머지(XR 기본 실행 확인, Point & Hold, Fade 등)는
-  전부 미착수.
+  설정, `_GatePassVR` 폴더 구조만 완료 상태이고, 나머지(XR 기본 실행 확인,
+  Point & Hold, Fade 등)는 전부 미착수.
 - XR 기본 실행, Ray Interaction 등은 아직 실기기/에디터에서 확인하지 않았음
   (`checklist.md`에 "미검증"으로 표기됨). 다음 세션은 이 확인부터 시작해야
   CLAUDE.md §29 절차(3단계: XR 기본 실행 확인)를 따르는 것이 된다.
-- 폴더 구조(`Assets/_GatePassVR/...`)는 아직 만들지 않았음. 새로 스크립트를
-  작성하기 전에 CLAUDE.md §15 구조대로 폴더를 먼저 만들 것.
+- 폴더 구조(`Assets/_GatePassVR/...`)는 생성 완료 (`.gitkeep`으로 빈 폴더
+  고정). Unity Editor를 처음 열면 `.meta` 파일이 자동 생성되므로 그 변경을
+  별도 커밋할 것.
 - 팀 담당자 배정은 CLAUDE.md §18에 이미 정의되어 있음 (김씨=메인 VR/시스템,
   이씨=콘텐츠/에셋, 조씨=예비/테스트 지원). 동일 Scene/Prefab을 동시 수정하지
   않도록 작업 전 소유자 확인.

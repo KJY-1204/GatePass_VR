@@ -8,7 +8,7 @@
 - [x] Unity 프로젝트 생성 (6000.3.10f1, VR Core 템플릿). Owner: 김씨.
 - [x] Git 저장소 생성, `.gitignore` 설정, GitHub Public 저장소(`GatePass_VR`) 연결. Owner: 김씨.
 - [x] `main`/`develop` 브랜치 구성. Owner: 김씨.
-- [ ] `Assets/_GatePassVR` 공통 폴더 구조 생성 (CLAUDE.md §15). Owner: 김씨.
+- [x] `Assets/_GatePassVR` 공통 폴더 구조 생성 (CLAUDE.md §15). Owner: 김씨.
 - [ ] XR/VR 기본 설정 실기기(또는 시뮬레이터) 기본 실행 확인. Owner: 김씨. — 미검증.
 - [ ] Controller Input과 Ray Interaction 동작 확인. Owner: 김씨. — 미검증.
 - [ ] Point & Hold 이동 시스템 구현 (`PointAndHoldTarget`). Owner: 김씨.
