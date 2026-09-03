@@ -1,0 +1,73 @@
+# Unity generated
+Library/
+Temp/
+Logs/
+obj/
+UserSettings/
+
+# Unity Asset previews / caches
+[Ll]ightmapSnapshot.dds
+[Aa]ssets/AssetStoreTools*
+*.tmp
+
+# Auto-generated VS/Rider/MonoDevelop files
+.vs/
+.vscode/
+.idea/
+*.csproj
+*.unityproj
+*.sln
+*.slnx
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+
+# Unity3D generated meta files that should not be ignored are handled by
+# not ignoring *.meta above (meta files are tracked intentionally)
+
+# Builds
+[Bb]uild/
+[Bb]uilds/
+*.apk
+*.aab
+*.unitypackage
+*.app
+
+# Crashlytics generated file
+crashlytics-build.properties
+
+# Packages (lock file is tracked, but generated package cache is not)
+Packages/packages-lock.json.meta
+
+# OS generated
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Memory captures
+[Mm]emoryCaptures/
+
+# Recordings
+[Rr]ecordings/
+
+# Editor Rendering artifacts
+*.tga.meta
+
+# Addressables
+/[Aa]ssets/[Aa]ddressables[Aa]ssetsData*.meta
+/[Aa]ssets/AddressableAssetsData/*/*.bin*
+
+# Android
+*.androidlib
