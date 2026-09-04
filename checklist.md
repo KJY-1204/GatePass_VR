@@ -14,6 +14,7 @@
 - [x] Point & Hold 게이지 컴포넌트 구현 (`PointAndHoldTarget` + `HoldGaugeState`). Owner: 김씨.
 - [x] Fade 화면 전환 구현 (`FadeMoveController`). Owner: 김씨.
 - [x] Grab 시스템 확인 (XR Interaction Toolkit 기존 기능 활용). Owner: 김씨. — Play Mode에서 `XRInteractionManager` 실제 파이프라인으로 Grab/Release 확인. 단, Hand Tracking 미연결 상태에서는 Near-Far Interactor가 자동 비활성화되므로 실기기/시뮬레이터 연결 후 재확인 필요.
+- [x] Point & Hold 진행률 시각 피드백 (`HoldProgressVisual`) + `onHoldCompleted` → `FadeMoveController.MoveTo` 연결. Owner: 김씨. — 퀘스트 실기기 테스트를 눈으로 확인 가능하게 하기 위한 사전 준비. SmokeTest 씬에서 Play Mode 시뮬레이션으로 전체 흐름(게이지 완료 → 초록색 → Fade → 이동) 확인 완료. 실제 손 추적 입력으로는 아직 미검증.
 
 ## Phase B. Reusable Interaction and Guidance
 
