@@ -16,6 +16,7 @@
 - [x] Fade 화면 전환 구현 (`FadeMoveController`). Owner: 김씨. — 퀘스트 실기기 검증 완료.
 - [x] Grab 시스템 확인 (XR Interaction Toolkit 기존 기능 활용). Owner: 김씨. — **퀘스트 3S 컨트롤러로 실기기 확인 완료**. Cube/Sphere 모두 정상적으로 잡힘.
 - [x] Point & Hold 진행률 시각 피드백을 2D 도넛(Radial) 게이지로 교체 (`RadialGaugeVisual`), `onHoldCompleted` → `FadeMoveController.MoveTo` 연결 유지. Owner: 김씨. — 사용자 실기기 테스트 피드백 반영: 큐브 색상 변화 방식(`HoldProgressVisual`) 대신 시계방향으로 차오르는 도넛형 Radial360 UI로 교체. `TestMap_Quest`의 패드 3개 모두 적용. Play Mode 시뮬레이션으로 fillAmount/방향/도넛 렌더링 확인, 실제 손 입력 재확인은 다음 실기기 테스트에서.
+- [x] 컨트롤러 모델 대신 VR 손 모델(PolyOne "Free VR Hands") 표시. Owner: 김씨. — 공용 Rig 프리팹(`Complete XR Origin Set Up Hands Variant`)의 `Left/Right Controller Visual` 하위 `UniversalController`(플라스틱 컨트롤러 메쉬)를 비활성화하고, 그 자리에 손 모델 본(`J_Left`/`J_Right`)을 재배치. 프리팹 공용 수정이라 `SampleScene`/`TestMap_Quest` 양쪽에 자동 반영됨(확인 완료). **미검증**: 실제 헤드셋에서 손 방향(회전값)이 자연스럽게 보이는지, 그립 애니메이션 없이 정적 포즈만으로 괜찮은지는 사용자가 실기기로 확인 필요.
 
 ## Phase B. Reusable Interaction and Guidance
 
