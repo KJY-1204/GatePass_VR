@@ -2,6 +2,52 @@
 
 결정 사항과 이유를 시간순으로 누적 기록한다. 완료된 내용을 삭제하지 않는다.
 
+## 2026-09-04 — 퀘스트 3S 실기기 테스트 통과 + 게이지를 Radial 도넛으로 교체
+
+- **중요 이정표**: 사용자가 `TestMap_Quest` 씬을 Meta Quest 3S 컨트롤러로
+  직접 테스트함. 패드 조준·홀드, Grab(Cube/Sphere), Fade 이동까지 전부
+  "깔끔하게 잘 된다"고 확인. 지금까지 세션 내내 "이벤트를 코드로 흉내 낸
+  것이라 미검증"이라고 반복 기록했던 부분이 드디어 **실제 손 입력 경로로
+  검증 완료**됨. Point & Hold, Fade, Grab 세 핵심 시스템 모두 M1(VR Core)
+  마일스톤의 상호작용 요건을 실기기에서 충족.
+- **결정**: 사용자 피드백에 따라 Point & Hold 게이지 표현 방식을 교체함.
+  - 기존: `HoldProgressVisual`이 큐브 자체의 색을 흰색→초록으로 Lerp.
+  - 변경: 신규 `RadialGaugeVisual`(`Scripts/Interaction`)이 World Space
+    Canvas 위 `Image`를 `Image.Type.Filled` + `FillMethod.Radial360` +
+    `fillOrigin=Top` + `fillClockwise=true`로 설정해 시계 방향으로 차오르는
+    2D 도넛(고리) 모양 게이지를 표시. 각 패드의 `onHoldCompleted`는 그대로
+    유지하고, `onProgressChanged` 리스너만 `HoldProgressVisual.SetProgress`
+    → `RadialGaugeVisual.SetProgress`로 교체 (컴포넌트 자체도 제거).
+  - **도넛 스프라이트는 외부 아트 없이 코드로 런타임 생성**(256x256 텍스처,
+    반지름 0.34~0.48 구간만 알파 255, 나머지 알파 0). 정적 캐시로 모든
+    게이지 인스턴스가 텍스처 하나를 공유해 복제하지 않는다 (CLAUDE.md §24
+    "Material/텍스처 복제 남발 금지"). 실제 아트가 들어오면 Inspector에서
+    `Image.sprite`를 직접 지정해 대체 가능하도록 구조는 그대로 둠.
+  - 게이지 링 오브젝트는 패드의 자식으로 넣지 않고 별도 루트 오브젝트로
+    배치했다. 패드가 비균등 스케일(0.8, 0.05, 0.8)이라 자식으로 넣으면
+    링이 눌린 타원으로 왜곡되기 때문. 대신 패드 위치 + (0, 0.06, 0)에
+    독립적으로 배치하고 회전만 `(-90,0,0)`으로 줘서 바닥에 눕혀 위를
+    보게 했다.
+- **중요한 작업 실수와 교훈**: 처음에 리스너 교체(`RemovePersistentListener`)와
+  `HoldProgressVisual` 컴포넌트 삭제(`DestroyImmediate`)를 **Play Mode
+  상태에서 실행**했다가, Stop 이후 전부 원래대로 되돌아간 것을 뒤늦게
+  발견함. **Unity는 Play Mode 중 씬에 가한 변경을 Stop 시 자동으로
+  버린다** — 이건 이미 알고 있던 사실이지만 이번엔 스크립트 편집이 아니라
+  "Persistent Listener 재배선" 같은 씬 데이터 편집도 똑같이 적용된다는
+  것을 놓쳤다. Edit Mode로 돌아와서 (`EditorApplication.isPlaying`로
+  확인 후) 다시 작업해서 해결함.
+  - **다음부터 적용할 규칙**: `execute_code`로 씬 GameObject/Component를
+    변경하는 모든 작업(컴포넌트 추가/삭제, Persistent Listener 배선,
+    프로퍼티 값 변경 등)은 반드시 `EditorApplication.isPlaying == false`
+    상태에서 하고, 실행 후 저장(`manage_scene action=save`)까지 마쳐야
+    한다. Play Mode 안에서의 같은 작업은 오직 "시뮬레이션 검증"용으로만
+    쓰고 절대 최종 결과로 착각하면 안 된다.
+- **검증 결과 (Play Mode, 여전히 이벤트 코드 호출 방식)**: 도넛 게이지가
+  `fillAmount`을 `PointAndHoldTarget.Progress`와 정확히 일치시켜 시계
+  방향으로 차오르고, 완료 시 기존과 동일하게 Fade+이동까지 이어지는 것을
+  스크린샷과 값 확인으로 재검증함. 큐브 자체는 이제 색이 바뀌지 않고
+  중립 상태 유지 (`SetPropertyBlock(null)`로 이전 초록색 잔상 제거).
+
 ## 2026-09-04 — `TestMap_Quest.unity` 제작 (퀘스트 실기기 테스트용 맵)
 
 - **배경**: 기존 `SmokeTest_PointHoldFade.unity`는 실제 XR Rig 없이 순수
@@ -234,22 +280,21 @@
 
 ## 다음 세션이 알아야 할 것
 
-- `plan.md`, `checklist.md`는 이번에 처음 생성됨. Phase A 항목 중 Git/GitHub
-  설정, `_GatePassVR` 폴더 구조, Point & Hold(`PointAndHoldTarget`)/Fade
-  (`FadeMoveController`) 스크립트, Grab 시스템(기존 XRI 기능) 확인까지 완료
-  상태. 남은 것은 XR 기본 실행/Ray Interaction/Grab 전부의 **실제 입력 경로**
-  (손 추적 또는 컨트롤러 Ray로 자연스럽게 조준·선택하는 것) 확인 뿐이다.
-- XR 기본 실행, 실제 손 추적/컨트롤러 Ray Interaction은 아직 확인하지
-  않았음 (`checklist.md`에 "미검증"으로 표기됨). **퀘스트 연결하면
-  `Assets/_GatePassVR/Scenes/TestMap_Quest.unity`를 Meta Quest Link/Air
-  Link로 실행해서 테스트하면 된다** (Build Settings에도 등록됨). 이 씬 하나로
-  Point & Hold 이동 3곳, Fade 전환, Grab까지 한 번에 확인 가능.
-- **중요**: Grab 확인 중 발견한 사실 — 이 프로젝트는 `XR Origin Hands`
-  기반이라 Hand Tracking 데이터가 없으면(헤드셋 미연결, 시뮬레이터 미가동)
-  Near-Far Interactor가 자동으로 비활성화된다. 즉 지금까지의 Point & Hold/
-  Fade/Grab 검증은 전부 "이벤트나 API를 코드로 강제 호출"한 것이지 실제
-  입력 경로로 조준·선택한 것이 아니다. 다음 세션에서 실기기 또는 Device
-  Simulator(손 포즈 시뮬레이션 포함)로 이 부분을 반드시 재확인할 것.
+- `plan.md`, `checklist.md`는 이번에 처음 생성됨. **Phase A는 사실상 완료
+  상태**: Git/GitHub, `_GatePassVR` 폴더 구조, Point & Hold(`PointAndHoldTarget`
+  + `RadialGaugeVisual`), Fade(`FadeMoveController`), Grab(기존 XRI 기능)
+  전부 퀘스트 3S 컨트롤러로 실기기 검증까지 완료됨(2026-09-04). 남은 Phase A
+  잔여 항목은 없고, 다음은 Phase B(`ScenarioManager`/`GuideManager` 등)로
+  넘어가면 된다.
+- `Assets/_GatePassVR/Scenes/TestMap_Quest.unity`가 실기기 테스트에 실제로
+  사용된 검증된 씬이다 (Build Settings에도 등록됨). Point & Hold 이동 3곳,
+  Fade 전환, Grab까지 한 번에 확인 가능. 앞으로 새 상호작용 시스템을 만들
+  때도 이 씬에 추가해서 실기기로 확인하는 흐름을 유지하면 된다.
+- Point & Hold 게이지 시각 표현은 `RadialGaugeVisual`(시계방향 도넛 Radial
+  게이지)로 최종 확정. `HoldProgressVisual`(색상 변화 방식)은 `SmokeTest_
+  PointHoldFade.unity`에는 아직 남아있지만 `TestMap_Quest`에서는 제거됨 —
+  두 시각화 방식이 씬마다 다르게 남아있다는 점 인지할 것. 통일하고 싶으면
+  `SmokeTest_PointHoldFade`도 `RadialGaugeVisual`로 맞추면 된다.
 - 폴더 구조(`Assets/_GatePassVR/...`)는 생성 완료, `.meta` 파일도 이미
   Unity Editor를 통해 정상 생성·커밋됨.
 - `Assets/_GatePassVR/Scenes/SmokeTest_PointHoldFade.unity`는 Point & Hold/

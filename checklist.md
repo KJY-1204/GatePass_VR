@@ -9,13 +9,13 @@
 - [x] Git 저장소 생성, `.gitignore` 설정, GitHub Public 저장소(`GatePass_VR`) 연결. Owner: 김씨.
 - [x] `main`/`develop` 브랜치 구성. Owner: 김씨.
 - [x] `Assets/_GatePassVR` 공통 폴더 구조 생성 (CLAUDE.md §15). Owner: 김씨.
-- [ ] XR/VR 기본 설정 실기기(또는 시뮬레이터) 기본 실행 확인. Owner: 김씨. — 미검증. `TestMap_Quest` 씬 준비 완료, 퀘스트 연결 후 실행만 하면 됨.
-- [ ] Controller Input과 Ray Interaction 동작 확인. Owner: 김씨. — 미검증. 위와 동일.
-- [x] 퀘스트 실기기 테스트용 `TestMap_Quest.unity` 제작. Owner: 김씨. — 실제 XR Origin Prefab(`Complete XR Origin Set Up Hands Variant`) 재사용, Point & Hold 이동 패드 3개(왕복 루프: Start→GrabZone→OpenArea→Start), Grab 테스트용 테이블+오브젝트 2개 구성. Build Settings에 등록. Play Mode 시뮬레이션으로 전체 루프+Grab 동작 확인, 실제 손 입력은 미검증.
-- [x] Point & Hold 게이지 컴포넌트 구현 (`PointAndHoldTarget` + `HoldGaugeState`). Owner: 김씨.
-- [x] Fade 화면 전환 구현 (`FadeMoveController`). Owner: 김씨.
-- [x] Grab 시스템 확인 (XR Interaction Toolkit 기존 기능 활용). Owner: 김씨. — Play Mode에서 `XRInteractionManager` 실제 파이프라인으로 Grab/Release 확인. 단, Hand Tracking 미연결 상태에서는 Near-Far Interactor가 자동 비활성화되므로 실기기/시뮬레이터 연결 후 재확인 필요.
-- [x] Point & Hold 진행률 시각 피드백 (`HoldProgressVisual`) + `onHoldCompleted` → `FadeMoveController.MoveTo` 연결. Owner: 김씨. — 퀘스트 실기기 테스트를 눈으로 확인 가능하게 하기 위한 사전 준비. SmokeTest 씬에서 Play Mode 시뮬레이션으로 전체 흐름(게이지 완료 → 초록색 → Fade → 이동) 확인 완료. 실제 손 추적 입력으로는 아직 미검증.
+- [x] XR/VR 기본 설정 실기기 기본 실행 확인. Owner: 김씨. — **퀘스트 3S 컨트롤러로 실기기 확인 완료 (2026-09-04)**. `TestMap_Quest` 씬에서 정상 실행됨.
+- [x] Controller Input과 Ray Interaction 동작 확인. Owner: 김씨. — **퀘스트 3S 컨트롤러로 실기기 확인 완료**. 패드 조준/홀드 정상 동작.
+- [x] 퀘스트 실기기 테스트용 `TestMap_Quest.unity` 제작. Owner: 김씨. — 실제 XR Origin Prefab(`Complete XR Origin Set Up Hands Variant`) 재사용, Point & Hold 이동 패드 3개(왕복 루프: Start→GrabZone→OpenArea→Start), Grab 테스트용 테이블+오브젝트 2개 구성. Build Settings에 등록. **퀘스트 3S 컨트롤러로 실기기 테스트 완료** — 패드 조준/홀드, Grab, 이동 전부 정상 동작 확인.
+- [x] Point & Hold 게이지 컴포넌트 구현 (`PointAndHoldTarget` + `HoldGaugeState`). Owner: 김씨. — 퀘스트 실기기 검증 완료.
+- [x] Fade 화면 전환 구현 (`FadeMoveController`). Owner: 김씨. — 퀘스트 실기기 검증 완료.
+- [x] Grab 시스템 확인 (XR Interaction Toolkit 기존 기능 활용). Owner: 김씨. — **퀘스트 3S 컨트롤러로 실기기 확인 완료**. Cube/Sphere 모두 정상적으로 잡힘.
+- [x] Point & Hold 진행률 시각 피드백을 2D 도넛(Radial) 게이지로 교체 (`RadialGaugeVisual`), `onHoldCompleted` → `FadeMoveController.MoveTo` 연결 유지. Owner: 김씨. — 사용자 실기기 테스트 피드백 반영: 큐브 색상 변화 방식(`HoldProgressVisual`) 대신 시계방향으로 차오르는 도넛형 Radial360 UI로 교체. `TestMap_Quest`의 패드 3개 모두 적용. Play Mode 시뮬레이션으로 fillAmount/방향/도넛 렌더링 확인, 실제 손 입력 재확인은 다음 실기기 테스트에서.
 
 ## Phase B. Reusable Interaction and Guidance
 
