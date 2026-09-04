@@ -2,6 +2,62 @@
 
 결정 사항과 이유를 시간순으로 누적 기록한다. 완료된 내용을 삭제하지 않는다.
 
+## 2026-09-04 — `TestMap_Quest.unity` 제작 (퀘스트 실기기 테스트용 맵)
+
+- **배경**: 기존 `SmokeTest_PointHoldFade.unity`는 실제 XR Rig 없이 순수
+  로직 검증용으로 만든 씬이라(가짜 `PlayerOrigin` Transform, 일반 Camera)
+  그대로 퀘스트에 빌드해도 헤드셋 트래킹이 전혀 동작하지 않는다. 퀘스트
+  연결 시 실제로 걸어 다니며 테스트할 "맵"이 별도로 필요해서 새로 제작.
+- **결정**: XR Rig를 직접 다시 구성하지 않고, 프로젝트에 이미 있는 프리팹
+  두 개를 그대로 인스턴스화해서 재사용했다.
+  - `Assets/VRTemplateAssets/Prefabs/Setup/Complete XR Origin Set Up Hands
+    Variant.prefab` — `SampleScene`의 "XR Origin Hands (XR Rig)"가 바로 이
+    프리팹의 인스턴스였음을 확인하고 동일하게 사용.
+  - `Assets/VRTemplateAssets/Prefabs/Setup/Hands Permissions Manager.prefab`
+    — Android 런타임 손 추적 권한 요청 처리.
+  - **이유**: CLAUDE.md "기존 XR Rig 구조가 있으면 먼저 읽고 존중한다",
+    "같은 기능이 이미 있으면 새로 만들기보다 기존 구현을 최소 수정한다"를
+    그대로 적용. 손수 XR Origin을 새로 조립하면 Near-Far Interactor, Gaze
+    Assistance, Hand Subsystem 연결 등을 처음부터 다시 맞춰야 해서 위험이
+    크고 불필요함.
+- **맵 구성** (`Assets/_GatePassVR/Scenes/TestMap_Quest.unity`):
+  - `Floor`(15×15 Plane), `Directional Light`.
+  - `WaypointStart`(0,0,-5) — XR Origin 스폰 위치와 동일.
+  - Point & Hold 이동 패드 3개로 왕복 루프 구성: `Pad_ToGrabZone`(시작
+    지점 근처) → `WaypointGrabZone`(-5,0,2) → `Pad_ToOpenArea` →
+    `WaypointOpenArea`(5,0,2) → `Pad_BackToStart` → `WaypointStart`로 복귀.
+    각 패드는 `PointAndHoldTarget` + `HoldProgressVisual`을 갖고
+    `onHoldCompleted`가 `FadeController(FadeMoveController).MoveTo`를
+    직접 호출하도록 연결(연결 방식은 이전 세션의 `UnityEventTools.
+    AddObjectPersistentListener` 방식과 동일).
+  - `GrabTable` + `GrabCube`/`GrabSphere`(Rigidbody + `XRGrabInteractable`,
+    `movementType=VelocityTracking`, `throwOnDetach=true`) — `WaypointGrabZone`
+    도착 지점 바로 옆에 배치해서 이동 직후 바로 Grab 테스트 가능.
+  - `FadeCanvas`/`FadeController`는 기존 SmokeTest 씬과 동일한 패턴
+    (Screen Space Overlay Canvas + CanvasGroup).
+- **Build Settings**: `manage_build(action=scenes)`로 `SampleScene`과
+  `TestMap_Quest`를 Build Settings에 등록. 등록 직후에는 메모리에만 반영되고
+  `ProjectSettings/EditorBuildSettings.asset`에 디스크로 저장되지 않아서
+  `AssetDatabase.SaveAssets()`를 명시적으로 호출해야 했음 — 다음에 이 툴로
+  빌드 씬 목록을 바꿀 때는 반드시 SaveAssets까지 해야 git에 반영된다는 점
+  기억할 것.
+  - 현재 빌드 타겟은 여전히 Windows64다. Quest 테스트는 Android APK
+    빌드가 아니라 **Meta Quest Link/Air Link로 PC 빌드를 헤드셋에 스트리밍**
+    하는 방식을 전제로 준비했다 (더 가볍고 빠른 반복 테스트 방법). 실제
+    Android/Quest Standalone APK Build 전환은 별도 작업이며 아직 하지
+    않았음 (CLAUDE.md §23 "Android Build Support가 설치된 환경에서만
+    검증").
+- **검증 결과 (Play Mode, Hover/Select 이벤트 코드 직접 호출 시뮬레이션)**:
+  Start → GrabZone → OpenArea → Start 전체 루프에서 `XR Origin Hands (XR
+  Rig)`의 위치가 각 Waypoint와 정확히 일치하는 것을 확인. `GrabCube`를
+  `XRInteractionManager.SelectEnterUnconditionally`/`SelectExit`로 잡고
+  놓는 것도 정상 동작. 콘솔에는 헤드셋 미연결 시 나오는 기존 경고
+  (오디오 드라이버, Eye/Hand Tracking Subsystem 없음) 외 에러 없음.
+  - **미검증 (다음 세션 필수)**: 지금까지와 마찬가지로 이 검증도 이벤트를
+    코드로 흉내 낸 것이다. 퀘스트를 연결해서 실제로 걸어 다니며 손으로
+    패드를 가리키고 오브젝트를 잡는 것은 아직 확인 못 했다. **이 씬이
+    바로 그 실기기 테스트를 위해 만든 맵이다.**
+
 ## 2026-09-04 — 퀘스트 실기기 테스트 사전 준비 (시각 피드백 + Fade 연결)
 
 - **배경**: 퀘스트 3S가 충전 중이라 아직 연결 전. 연결하자마자 바로 의미
@@ -184,9 +240,10 @@
   상태. 남은 것은 XR 기본 실행/Ray Interaction/Grab 전부의 **실제 입력 경로**
   (손 추적 또는 컨트롤러 Ray로 자연스럽게 조준·선택하는 것) 확인 뿐이다.
 - XR 기본 실행, 실제 손 추적/컨트롤러 Ray Interaction은 아직 확인하지
-  않았음 (`checklist.md`에 "미검증"으로 표기됨). Meta Quest 3S가 있으니
-  충전이 끝나면 실기기로, 또는 그 전에 XR Device Simulator(`Assets/XR/...`에
-  이미 설정되어 있음)로 먼저 확인할 수 있다.
+  않았음 (`checklist.md`에 "미검증"으로 표기됨). **퀘스트 연결하면
+  `Assets/_GatePassVR/Scenes/TestMap_Quest.unity`를 Meta Quest Link/Air
+  Link로 실행해서 테스트하면 된다** (Build Settings에도 등록됨). 이 씬 하나로
+  Point & Hold 이동 3곳, Fade 전환, Grab까지 한 번에 확인 가능.
 - **중요**: Grab 확인 중 발견한 사실 — 이 프로젝트는 `XR Origin Hands`
   기반이라 Hand Tracking 데이터가 없으면(헤드셋 미연결, 시뮬레이터 미가동)
   Near-Far Interactor가 자동으로 비활성화된다. 즉 지금까지의 Point & Hold/

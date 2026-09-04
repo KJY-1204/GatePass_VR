@@ -9,8 +9,9 @@
 - [x] Git 저장소 생성, `.gitignore` 설정, GitHub Public 저장소(`GatePass_VR`) 연결. Owner: 김씨.
 - [x] `main`/`develop` 브랜치 구성. Owner: 김씨.
 - [x] `Assets/_GatePassVR` 공통 폴더 구조 생성 (CLAUDE.md §15). Owner: 김씨.
-- [ ] XR/VR 기본 설정 실기기(또는 시뮬레이터) 기본 실행 확인. Owner: 김씨. — 미검증.
-- [ ] Controller Input과 Ray Interaction 동작 확인. Owner: 김씨. — 미검증.
+- [ ] XR/VR 기본 설정 실기기(또는 시뮬레이터) 기본 실행 확인. Owner: 김씨. — 미검증. `TestMap_Quest` 씬 준비 완료, 퀘스트 연결 후 실행만 하면 됨.
+- [ ] Controller Input과 Ray Interaction 동작 확인. Owner: 김씨. — 미검증. 위와 동일.
+- [x] 퀘스트 실기기 테스트용 `TestMap_Quest.unity` 제작. Owner: 김씨. — 실제 XR Origin Prefab(`Complete XR Origin Set Up Hands Variant`) 재사용, Point & Hold 이동 패드 3개(왕복 루프: Start→GrabZone→OpenArea→Start), Grab 테스트용 테이블+오브젝트 2개 구성. Build Settings에 등록. Play Mode 시뮬레이션으로 전체 루프+Grab 동작 확인, 실제 손 입력은 미검증.
 - [x] Point & Hold 게이지 컴포넌트 구현 (`PointAndHoldTarget` + `HoldGaugeState`). Owner: 김씨.
 - [x] Fade 화면 전환 구현 (`FadeMoveController`). Owner: 김씨.
 - [x] Grab 시스템 확인 (XR Interaction Toolkit 기존 기능 활용). Owner: 김씨. — Play Mode에서 `XRInteractionManager` 실제 파이프라인으로 Grab/Release 확인. 단, Hand Tracking 미연결 상태에서는 Near-Far Interactor가 자동 비활성화되므로 실기기/시뮬레이터 연결 후 재확인 필요.
