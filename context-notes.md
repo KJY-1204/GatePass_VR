@@ -2,6 +2,45 @@
 
 결정 사항과 이유를 시간순으로 누적 기록한다. 완료된 내용을 삭제하지 않는다.
 
+## 2026-09-04 — 퀘스트 실기기 테스트 사전 준비 (시각 피드백 + Fade 연결)
+
+- **배경**: 퀘스트 3S가 충전 중이라 아직 연결 전. 연결하자마자 바로 의미
+  있는 테스트를 할 수 있도록, 지금까지 "로직은 있지만 눈에 보이는 결과가
+  없던" 두 지점을 메꿔둠.
+- **결정**: `HoldProgressVisual`(신규, `Scripts/Interaction`)을 만들어
+  `PointAndHoldTarget.onProgressChanged(float)`에 연결. 게이지 진행률에
+  따라 오브젝트 색을 흰색→초록색으로 Lerp한다. `MaterialPropertyBlock`을
+  사용해 머티리얼 애셋 자체를 복제하지 않도록 함 (CLAUDE.md §24 "동일
+  오브젝트의 Material 복제를 남발하지 않는다").
+  - 이 컴포넌트는 정식 UI가 아니라 **임시 디버그/검증용 시각 피드백**이다.
+    Phase B의 정식 "Point & Hold Progress UI Prefab"이 생기면 이걸 대체하거나
+    같이 쓸 수 있다. 지금은 헤드셋에서 눈으로 확인만 되면 충분하므로
+    최소 구현만 함.
+- **결정**: `SmokeTest_PointHoldFade.unity`에서
+  `PointAndHoldTarget.onHoldCompleted` → `FadeMoveController.MoveTo(WaypointB)`를
+  Inspector 수준에서 연결 (코드가 아니라 `UnityEditor.Events.UnityEventTools.
+  AddObjectPersistentListener<Transform>`로 씬에 Persistent Listener로
+  저장). `onHoldCompleted`는 `UnityEvent<PointAndHoldTarget>`이고
+  `MoveTo`는 `Transform` 인자를 받아 타입이 다르지만, Unity UnityEvent의
+  "Static Parameter" 방식으로 고정 인자(WaypointB)를 넘기도록 연결했다 —
+  Inspector에서 수동으로 연결하는 것과 동일한 결과.
+  - **이유**: `ScenarioManager`가 아직 없어서 정식 Step 전환 로직으로
+    연결할 수는 없지만, 지금 단계에서 "Point & Hold 성공 → Fade 이동"이
+    실제로 이어지는지 눈으로 보려면 임시로라도 연결이 필요했음. 나중에
+    `ScenarioManager`가 생기면 이 Persistent Listener는 제거하고 Step
+    기반 로직으로 대체할 것 (지금 연결은 SmokeTest 전용, 실제 콘텐츠
+    Scene에는 적용하지 않음).
+- **검증 결과 (Play Mode, Hover 이벤트 코드 직접 호출 시뮬레이션)**:
+  게이지가 1.0에 도달하자 큐브 색이 정확히 초록색(RGBA 0,1,0,1)으로
+  바뀌었고, 동시에 `FadeMoveController`가 자동으로 트리거되어
+  `PlayerOrigin`이 `WaypointB` 위치로 이동 완료(`IsMoving=false`)까지
+  확인함. Point & Hold → 시각 피드백 → Fade → 이동 전체 체인이 정상
+  동작.
+  - **여전히 미검증**: 이번에도 실제 손 추적/컨트롤러 Ray로 조준한 것이
+    아니라 이벤트를 코드로 흉내 낸 것이다. 퀘스트 연결 후 실제로 손으로
+    큐브를 가리키고 있으면 색이 서서히 변하다가 초록이 되고, 화면이
+    Fade됐다가 다른 위치에 다시 뜨는지 최종 확인이 필요하다.
+
 ## 2026-09-04 — Grab 시스템 확인 (기존 XRI 기능, 코드 변경 없음)
 
 - **확인 방법**: `SampleScene`의 "Interactables" 그룹(Unity VR Template 기본
