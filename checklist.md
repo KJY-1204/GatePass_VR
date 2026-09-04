@@ -13,7 +13,7 @@
 - [ ] Controller Input과 Ray Interaction 동작 확인. Owner: 김씨. — 미검증.
 - [x] Point & Hold 게이지 컴포넌트 구현 (`PointAndHoldTarget` + `HoldGaugeState`). Owner: 김씨.
 - [x] Fade 화면 전환 구현 (`FadeMoveController`). Owner: 김씨.
-- [ ] Grab 시스템 확인 (XR Interaction Toolkit 기존 기능 활용). Owner: 김씨.
+- [x] Grab 시스템 확인 (XR Interaction Toolkit 기존 기능 활용). Owner: 김씨. — Play Mode에서 `XRInteractionManager` 실제 파이프라인으로 Grab/Release 확인. 단, Hand Tracking 미연결 상태에서는 Near-Far Interactor가 자동 비활성화되므로 실기기/시뮬레이터 연결 후 재확인 필요.
 
 ## Phase B. Reusable Interaction and Guidance
 

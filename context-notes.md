@@ -2,6 +2,43 @@
 
 결정 사항과 이유를 시간순으로 누적 기록한다. 완료된 내용을 삭제하지 않는다.
 
+## 2026-09-04 — Grab 시스템 확인 (기존 XRI 기능, 코드 변경 없음)
+
+- **확인 방법**: `SampleScene`의 "Interactables" 그룹(Unity VR Template 기본
+  제공, Cube/Cylinder/Torus/Tapered/Sphere/Arch/Blaster/Spatial Panel 등 총
+  10개, 전부 `XRGrabInteractable` 장착 완료 상태)을 그대로 사용. 코드는 하나도
+  추가/수정하지 않았고 기존 기능이 프로젝트에서 실제로 동작하는지만 검증함
+  (CLAUDE.md "기존 기능이 있으면 새로 만들지 않는다" 원칙).
+  - Play Mode에서 `XRInteractionManager.SelectEnterUnconditionally(interactor,
+    interactable)` / `SelectExit(...)`를 직접 호출해 "Cube Interactable"을
+    `XR Origin Hands (XR Rig)`의 Right Controller `Near-Far Interactor`로
+    잡고 놓는 전체 사이클을 실측함.
+  - 결과: `isSelected` true/false 정상 전환, `interactorsSelecting`에 정확한
+    인터랙터 등록, `movementType=VelocityTracking`에 따라 Cube가 실제
+    물리적으로 인터랙터 근처까지 이동(거리 약 0.25)한 뒤 Release 시 정상
+    분리됨. Grab 자체의 핵심 로직(XRGrabInteractable + XRInteractionManager)은
+    정상 동작.
+- **중요 발견**: 처음에 공개 API `SelectEnter(interactor, interactable)`
+  (검증을 거치는 버전)를 호출했을 때는 아무 효과가 없었음. 콘솔 로그 확인
+  결과 원인은 "Interactor is not registered with this XR Interaction
+  Manager. The interactor component is not active and enabled." —
+  즉 **Hand Tracking 데이터가 없는 상태(헤드셋 미연결, Device Simulator
+  미가동)에서는 Near-Far Interactor 자체가 비활성 상태**였음. 이 프로젝트가
+  `XR Origin Hands` 기반(컨트롤러가 아니라 손 추적 우선)이라 나타나는 특성.
+  - 검증 자체는 등록/가능성 검사를 건너뛰는 `SelectEnterUnconditionally`로
+    우회해서 실제 물리 동작까지 확인했지만, 이는 **정상적인 사용자 입력
+    경로(실제 손 추적 또는 컨트롤러 Ray로 조준 → Select 버튼)를 검증한 것은
+    아니다.**
+  - **미검증 (다음 세션 필수)**: 실제 Quest 3S 연결 또는 XR Device
+    Simulator로 손을 움직여 "자연스럽게 Hover → Select"가 되는지는 아직
+    확인 못 함. Point & Hold Ray Hover와 마찬가지로 실기기/시뮬레이터
+    연결 후 재확인 필요.
+  - 이 세션 동안 나머지 경고(XR 오디오 드라이버, Eye Tracking/Hand Tracking
+    Subsystem 없음)는 헤드셋 미연결 상태에서 기대되는 정상 로그이며 버그
+    아님.
+- **작업 형태**: 코드/씬 변경 없이 검증만 했으므로 별도 커밋 없이 `checklist.
+  md`/`context-notes.md`만 갱신.
+
 ## 2026-09-04 — Point & Hold / Fade 스크립트 구현
 
 - **결정**: 게이지 누적 로직을 `HoldGaugeState`(순수 C# 클래스)로 분리하고,
@@ -104,12 +141,19 @@
 
 - `plan.md`, `checklist.md`는 이번에 처음 생성됨. Phase A 항목 중 Git/GitHub
   설정, `_GatePassVR` 폴더 구조, Point & Hold(`PointAndHoldTarget`)/Fade
-  (`FadeMoveController`) 스크립트가 완료 상태. 남은 것은 XR 기본 실행/Ray
-  Interaction의 실기기(또는 Device Simulator) 확인, Grab 시스템 확인.
-- XR 기본 실행, 실제 컨트롤러 Ray Interaction은 아직 확인하지 않았음
-  (`checklist.md`에 "미검증"으로 표기됨). Meta Quest 3S가 있으니 충전이
-  끝나면 실기기로, 또는 그 전에 XR Device Simulator(`Assets/XR/...`에 이미
-  설정되어 있음)로 먼저 확인할 수 있다.
+  (`FadeMoveController`) 스크립트, Grab 시스템(기존 XRI 기능) 확인까지 완료
+  상태. 남은 것은 XR 기본 실행/Ray Interaction/Grab 전부의 **실제 입력 경로**
+  (손 추적 또는 컨트롤러 Ray로 자연스럽게 조준·선택하는 것) 확인 뿐이다.
+- XR 기본 실행, 실제 손 추적/컨트롤러 Ray Interaction은 아직 확인하지
+  않았음 (`checklist.md`에 "미검증"으로 표기됨). Meta Quest 3S가 있으니
+  충전이 끝나면 실기기로, 또는 그 전에 XR Device Simulator(`Assets/XR/...`에
+  이미 설정되어 있음)로 먼저 확인할 수 있다.
+- **중요**: Grab 확인 중 발견한 사실 — 이 프로젝트는 `XR Origin Hands`
+  기반이라 Hand Tracking 데이터가 없으면(헤드셋 미연결, 시뮬레이터 미가동)
+  Near-Far Interactor가 자동으로 비활성화된다. 즉 지금까지의 Point & Hold/
+  Fade/Grab 검증은 전부 "이벤트나 API를 코드로 강제 호출"한 것이지 실제
+  입력 경로로 조준·선택한 것이 아니다. 다음 세션에서 실기기 또는 Device
+  Simulator(손 포즈 시뮬레이션 포함)로 이 부분을 반드시 재확인할 것.
 - 폴더 구조(`Assets/_GatePassVR/...`)는 생성 완료, `.meta` 파일도 이미
   Unity Editor를 통해 정상 생성·커밋됨.
 - `Assets/_GatePassVR/Scenes/SmokeTest_PointHoldFade.unity`는 Point & Hold/
