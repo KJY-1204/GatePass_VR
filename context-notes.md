@@ -2,6 +2,59 @@
 
 결정 사항과 이유를 시간순으로 누적 기록한다. 완료된 내용을 삭제하지 않는다.
 
+## 2026-09-04 — 손가락 구부림(그립) 애니메이션을 절차적으로 구현
+
+- **배경**: PolyOne 손 에셋에 그립/트리거 반응 애니메이션이 없다는 걸
+  지난 세션에 확인했고, 사용자가 이번에 손가락 구부림을 만들어달라고
+  요청. 애니메이션 클립을 새로 만드는 대신, 이미 있는 본 계층을 코드로
+  직접 회전시키는 절차적(procedural) 방식을 선택.
+- **본 축 규칙 발견**: `Free Pack - VR Hands ( Rigged )` 프리팹의 모든
+  손가락 관절(엄지 포함)은 **로컬 +Y축이 항상 자식 본(손끝) 방향**을
+  향하도록 모델링되어 있고, 대기 포즈에서 이미 로컬 X축으로 몇 도씩
+  살짝 굽어있는 상태였다(예: `HandIndex2` = 3.35°, `HandThumb2` = 8.69°).
+  이 패턴으로 "로컬 X축 회전 = 구부림 축"이라는 결론을 내렸고, 왼손/오른손
+  둘 다 (본의 로컬 좌표계가 서로 미러링되어 있음에도) **양수 X 회전을
+  더하면 동일하게 안쪽으로 구부러지는 것**을 스크린샷으로 직접 확인해
+  검증함(양손을 인위적으로 떨어뜨려 놓고 각각 확인).
+- **결정**: `FingerCurlAnimator`(`Scripts/VR`)를 만들어 `(bone, curlAngle)`
+  쌍의 배열을 받고, `Awake()`에서 각 본의 "편 상태" 로컬 회전을 캐싱한 뒤
+  `SetCurl(0~1)`로 `openRotation * AngleAxis(curlAngle * curl, Vector3.right)`
+  를 적용한다. 축을 컴포넌트 파라미터로 노출하지 않고 코드에 고정한 이유는
+  이 리그의 모든 관절이 동일한 축 규칙을 따르는 게 확인됐기 때문
+  (Simplicity First — 불필요한 설정 노출 안 함).
+  - 손가락당 4관절(1~4) × 5손가락 × 양손 = 총 40개 항목을 Prefab Stage에서
+    `SerializedObject`로 한 번에 구성함. 각도는 관절별로 70/90/90/60도로
+    차등을 둬서(끝 마디는 덜 굽게) 좀 더 자연스러운 주먹 모양이 나오게 함.
+  - `HandGripInputDriver`(`Scripts/VR`)가 `InputDevices.GetDeviceAtXRNode`로
+    Grip/Trigger 값을 읽어 `Max(grip, trigger)`를 `FingerCurlAnimator.SetCurl`에
+    넘긴다. `Left Controller`/`Right Controller` 오브젝트에 각각 붙임.
+    (XRI의 Select/Activate Input Action을 재사용하지 않고 XR 디바이스
+    값을 직접 읽은 이유: 별도 Input Action 에셋 구조를 몰라도 되고,
+    그립 시각화 전용으로 목적이 분명해서 최소 의존성으로 유지.)
+- **검증 결과 (Play Mode, `SetCurl()` 직접 호출)**: 0(펴짐)/0.5(절반)/1(완전
+  주먹) 전부 스크린샷으로 확인. 절반은 손가락이 자연스럽게 반쯤 굽은
+  모양, 완전 주먹은 뭉툭한 주먹 실루엣으로 잘 나옴. 콘솔 에러 없음.
+  **미검증**: 실제 컨트롤러의 Grip/Trigger를 눌렀을 때 `HandGripInputDriver`가
+  정상적으로 값을 읽어오는지는 실기기에서만 확인 가능 (에디터에는 XR
+  디바이스가 연결되어 있지 않음).
+- **작업 중 발견한 무관한 이슈와 처리**: `TestMap_Quest.unity`를 저장할 때
+  `Complete XR Origin Set Up Hands Variant` 프리팹 내부의 Tooltip UI
+  (Affordance Callout들의 `Tooltip Canvas`, TextMeshPro 기반 Content Size
+  Fitter 사용)의 `m_SizeDelta`가 저장할 때마다 0으로 잘못 직렬화되는
+  현상을 발견함. `LayoutRebuilder.ForceRebuildLayoutImmediate`로 강제
+  재계산해도 저장 시점에 따라 다시 0으로 돌아가는 등 일관성이 없었음 —
+  아마도 TextMeshPro Content Size Fitter가 화면에 한 번도 렌더링되지
+  않은 상태에서 크기를 잘못 계산하는 문제로 추정.
+  - **이번 작업과 무관하다고 판단해 조사를 중단**하고, `TestMap_Quest.unity`를
+    `git checkout`으로 마지막 커밋 상태로 되돌린 뒤 Unity에 다시 로드시켰다.
+    손가락 구부림 기능은 전부 프리팹 쪽 변경이라 씬 파일을 되돌려도
+    영향 없음(재확인 완료 — 프리팹 상속을 통해 정상적으로 존재).
+  - **다음에 이 프로젝트에서 Tooltip/Affordance Callout UI를 건드릴 일이
+    있으면** 이 `m_SizeDelta` 직렬화 불안정 현상을 먼저 의심해볼 것.
+    지금 당장 기능에 영향은 없어 보이지만(Tooltip 자체가 일반 플레이에서
+    거의 노출 안 되는 보조 UI), 나중에 문제가 되면 TextMeshPro 폰트 로딩
+    타이밍이나 Content Size Fitter 설정을 점검해야 할 수 있음.
+
 ## 2026-09-04 — 컨트롤러 모델을 PolyOne VR 손 모델로 교체
 
 - **배경**: 사용자가 `Assets/PolyOne/Free VR Hands` 에셋(무료 VR 손 모델)을
