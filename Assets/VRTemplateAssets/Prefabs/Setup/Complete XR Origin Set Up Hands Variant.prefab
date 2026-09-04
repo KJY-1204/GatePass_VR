@@ -363,6 +363,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3942523741739022682}
+  - component: {fileID: 3618067850720917043}
   m_Layer: 0
   m_Name: J_Left
   m_TagString: Untagged
@@ -386,6 +387,59 @@ Transform:
   - {fileID: 4623322226227501770}
   m_Father: {fileID: 1871916905115650005}
   m_LocalEulerAnglesHint: {x: 42.222965, y: 72.03119, z: 71.34314}
+--- !u!114 &3618067850720917043
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2745053228614224008}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: af965a8252232934881399c5e705bea2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: GatePassVR.Runtime::GatePassVR.VR.FingerCurlAnimator
+  joints:
+  - bone: {fileID: 7682821738238726660}
+    curlAngle: 70
+  - bone: {fileID: 1325831024474488989}
+    curlAngle: 90
+  - bone: {fileID: 7659907817686701394}
+    curlAngle: 90
+  - bone: {fileID: 7636381522972062367}
+    curlAngle: 60
+  - bone: {fileID: 3788031661981142871}
+    curlAngle: 70
+  - bone: {fileID: 4389257980692968774}
+    curlAngle: 90
+  - bone: {fileID: 8619983766624220213}
+    curlAngle: 90
+  - bone: {fileID: 418528905407181008}
+    curlAngle: 60
+  - bone: {fileID: 7793998160747181335}
+    curlAngle: 70
+  - bone: {fileID: 5743374291306386858}
+    curlAngle: 90
+  - bone: {fileID: 6684990399055800713}
+    curlAngle: 90
+  - bone: {fileID: 2546946617490405804}
+    curlAngle: 60
+  - bone: {fileID: 3853452861670659256}
+    curlAngle: 70
+  - bone: {fileID: 417205646317367065}
+    curlAngle: 90
+  - bone: {fileID: 3413156803187559184}
+    curlAngle: 90
+  - bone: {fileID: 7341370764475571549}
+    curlAngle: 60
+  - bone: {fileID: 5889619174741317982}
+    curlAngle: 70
+  - bone: {fileID: 587552634714162614}
+    curlAngle: 90
+  - bone: {fileID: 5555896424005311135}
+    curlAngle: 90
+  - bone: {fileID: 2728203093299692260}
+    curlAngle: 60
 --- !u!1 &3031248451749178479
 GameObject:
   m_ObjectHideFlags: 0
@@ -458,6 +512,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2725722720508015334}
+  - component: {fileID: 8763197916408535485}
   m_Layer: 0
   m_Name: J_Right
   m_TagString: Untagged
@@ -481,6 +536,59 @@ Transform:
   - {fileID: 27002630290562602}
   m_Father: {fileID: 3997160942596605598}
   m_LocalEulerAnglesHint: {x: -55.996483, y: 144.30524, z: -129.12726}
+--- !u!114 &8763197916408535485
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3621415182266267037}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: af965a8252232934881399c5e705bea2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: GatePassVR.Runtime::GatePassVR.VR.FingerCurlAnimator
+  joints:
+  - bone: {fileID: 1022248344265500044}
+    curlAngle: 70
+  - bone: {fileID: 7224120024340257975}
+    curlAngle: 90
+  - bone: {fileID: 5092857849301444688}
+    curlAngle: 90
+  - bone: {fileID: 8659903747830817496}
+    curlAngle: 60
+  - bone: {fileID: 8292727911729388108}
+    curlAngle: 70
+  - bone: {fileID: 4150425443385497409}
+    curlAngle: 90
+  - bone: {fileID: 4700697094681361457}
+    curlAngle: 90
+  - bone: {fileID: 1073946928915324961}
+    curlAngle: 60
+  - bone: {fileID: 7487219307466487684}
+    curlAngle: 70
+  - bone: {fileID: 3281699505817866691}
+    curlAngle: 90
+  - bone: {fileID: 5355269122704221531}
+    curlAngle: 90
+  - bone: {fileID: 7432119002389913108}
+    curlAngle: 60
+  - bone: {fileID: 4076952633077453939}
+    curlAngle: 70
+  - bone: {fileID: 3443785245491756386}
+    curlAngle: 90
+  - bone: {fileID: 2977797694651981113}
+    curlAngle: 90
+  - bone: {fileID: 4401103845107843092}
+    curlAngle: 60
+  - bone: {fileID: 8190243764713222644}
+    curlAngle: 70
+  - bone: {fileID: 5831602636285815596}
+    curlAngle: 90
+  - bone: {fileID: 1825818992815722115}
+    curlAngle: 90
+  - bone: {fileID: 8197854401093513105}
+    curlAngle: 60
 --- !u!1 &4282248682246220290
 GameObject:
   m_ObjectHideFlags: 0
@@ -2233,7 +2341,13 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 6018838917197495621, guid: d6878e1999eb4b44a9f5a263af86c185, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2725722720508015334}
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 657184243640684908, guid: d6878e1999eb4b44a9f5a263af86c185, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5135505783449969175}
+    - targetCorrespondingSourceObject: {fileID: 657184242222895507, guid: d6878e1999eb4b44a9f5a263af86c185, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1658790322149855919}
   m_SourcePrefab: {fileID: 100100000, guid: d6878e1999eb4b44a9f5a263af86c185, type: 3}
 --- !u!114 &866406836232131125 stripped
 MonoBehaviour:
@@ -2278,6 +2392,25 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 6018838917197495621, guid: d6878e1999eb4b44a9f5a263af86c185, type: 3}
   m_PrefabInstance: {fileID: 7277802326999645147}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &7917674758240283208 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 657184242222895507, guid: d6878e1999eb4b44a9f5a263af86c185, type: 3}
+  m_PrefabInstance: {fileID: 7277802326999645147}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1658790322149855919
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7917674758240283208}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a887afae8ce8144ca1d1755ce0625ec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: GatePassVR.Runtime::GatePassVR.VR.HandGripInputDriver
+  handNode: 5
+  curlAnimator: {fileID: 8763197916408535485}
 --- !u!4 &7917674758240283209 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 657184242222895506, guid: d6878e1999eb4b44a9f5a263af86c185, type: 3}
@@ -2298,6 +2431,25 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 657184243640684915, guid: d6878e1999eb4b44a9f5a263af86c185, type: 3}
   m_PrefabInstance: {fileID: 7277802326999645147}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &7917674758919744183 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 657184243640684908, guid: d6878e1999eb4b44a9f5a263af86c185, type: 3}
+  m_PrefabInstance: {fileID: 7277802326999645147}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &5135505783449969175
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7917674758919744183}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a887afae8ce8144ca1d1755ce0625ec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: GatePassVR.Runtime::GatePassVR.VR.HandGripInputDriver
+  handNode: 4
+  curlAnimator: {fileID: 3618067850720917043}
 --- !u!114 &8053059486601427065 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 810019319561094050, guid: d6878e1999eb4b44a9f5a263af86c185, type: 3}
