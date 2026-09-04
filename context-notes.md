@@ -2,6 +2,64 @@
 
 결정 사항과 이유를 시간순으로 누적 기록한다. 완료된 내용을 삭제하지 않는다.
 
+## 2026-09-04 — 컨트롤러 모델을 PolyOne VR 손 모델로 교체
+
+- **배경**: 사용자가 `Assets/PolyOne/Free VR Hands` 에셋(무료 VR 손 모델)을
+  다운로드해두고, 컨트롤러 모델 대신 손이 보이게 해달라고 요청.
+- **에셋 구조 확인**: `Free Pack - VR Hands ( Rigged ).prefab` 하나에 왼손
+  (`Root/J_Left/...`)과 오른손(`Root/J_Right/...`) 본 계층이 모두 들어있고,
+  `SM_HandsVR_Male`이라는 SkinnedMeshRenderer 하나가 양손을 동시에 렌더링한다
+  (왼손/오른손 프리팹이 분리되어 있지 않음).
+  - **중요한 한계**: 이 에셋의 Animator Controller(`Free Pack - VR Hands (
+    Rigged ).controller`)에는 파라미터가 하나도 없고 State도 Idle 하나뿐 —
+    **그립/트리거에 반응하는 손가락 구부림 애니메이션이 전혀 없다.** 같은
+    폴더의 `Free VR Hands_Controler.controller`는 Angry/Happy/Jump 등
+    캐릭터 애니메이션용 스텁이라 VR 손 용도로 쓸 수 없음. 사용자에게 미리
+    안내함 — 지금은 항상 고정된 대기 포즈로만 보인다.
+- **결정**: 공용 Rig 프리팹 `Assets/VRTemplateAssets/Prefabs/Setup/Complete
+  XR Origin Set Up Hands Variant.prefab`을 Prefab Stage에서 직접 수정.
+  - `Free Pack - VR Hands ( Rigged )` 프리팹을 인스턴스화한 뒤 즉시
+    `PrefabUtility.UnpackPrefabInstance(..., Completely)`로 언팩(중첩
+    프리팹 상태로 두면 본만 다른 계층으로 재배치할 때 제약이 많아서).
+  - `J_Left`를 `Left Controller Visual` 밑으로, `J_Right`를 `Right
+    Controller Visual` 밑으로 재배치(로컬 포지션 0,0,0, 로컬 회전은
+    데모 씬에서 쓰던 원래 바인드 포즈 값 그대로 사용:
+    `J_Left = (0.06, 86.87, 179.76)`, `J_Right = (359.94, 93.13, 359.76)`).
+  - `SM_HandsVR_Male`(렌더러)은 `Camera Offset` 밑 `VR Hands Visual`
+    컨테이너에 그대로 둠 — SkinnedMeshRenderer는 `bones` 배열 참조로만
+    변형되므로 렌더러 자신의 위치는 시각적 결과에 영향 없음.
+  - 기존 `UniversalController`(플라스틱 컨트롤러 메쉬)는 삭제하지 않고
+    `SetActive(false)`로 비활성화만 함 — 나중에 되돌리기 쉽도록.
+  - 빈 `Root` 래퍼 오브젝트(본을 옮기고 나서 자식이 없어짐)는 정리해서
+    삭제함.
+  - 이 프리팹은 공용 Rig라서 **`SampleScene`과 `TestMap_Quest` 양쪽에
+    자동으로 반영됨**을 확인함 (두 씬 모두 로드해서 `UniversalController`
+    비활성화, 손 본 존재 확인, Console 에러 없음 확인).
+- **회전값 튜닝 관련 중요 참고**: Scene View 스크린샷으로 몇 차례
+  시도해봤는데, 원래 바인드 포즈 값을 그대로 쓰면 손이 "몸통 옆에 자연스럽게
+  늘어뜨린" 자세로 보이고(형태 자체는 멀쩡함), 컨트롤러를 쥐듯 앞으로 뻗은
+  자세는 아니다. 손끝이 아래나 옆을 향할 수 있음. X축으로 -90도 정도
+  틀어보는 시도는 손 모양이 이상하게(펼쳐진 자세로) 나와서 되돌렸다.
+  - **다음 세션/사용자가 할 일**: 실제 헤드셋을 쓰고 컨트롤러를 든 상태에서
+    `J_Left`/`J_Right`의 로컬 회전값(Inspector, `Complete XR Origin Set Up
+    Hands Variant` 프리팹을 열어서 `Left/Right Controller Visual` 하위)을
+    직접 눈으로 보면서 미세 조정하는 게 스크린샷 추측보다 훨씬 빠르고
+    정확하다. 스크린샷만으로는 "그립처럼 자연스러운지"를 판단하기 어려움.
+  - Editor 상에서는 Left/Right Controller가 트래킹 데이터 없이 같은
+    위치(원점 근처)에 겹쳐 있어서 스크린샷엔 손 하나만 보이는 것처럼
+    보였음 — 이건 버그가 아니라 에디터에 실제 트래킹 소스가 없어서 생기는
+    정상적인 현상. 실기기에서는 왼손/오른손이 각자 컨트롤러 위치로
+    정상적으로 떨어져 보일 것으로 예상됨(다음 실기기 테스트에서 확인).
+- **라이선스 확인 필요**: `Assets/PolyOne/Free VR Hands`는 사용자가 직접
+  다운로드해 프로젝트에 넣은 에셋이라 라이선스 조건(재배포/상업적 사용
+  가능 여부 등)은 확인하지 않았다. CLAUDE.md §16.5(외부 에셋 라이선스
+  불명확 시 후보 목록만 기록) 원칙상, 최종 빌드/배포 전에 라이선스 조건을
+  한 번 확인해두는 게 안전하다.
+- **참고**: `Assets/XR/Settings/OpenXRPackageSettings.asset`가 이번에도
+  또 fileID만 바뀌는 형태로 수정되어 있었음 (지난번과 동일한 현상, 저번에
+  이미 한 번 커밋했었는데 Unity를 다시 쓰니 또 발생). 이번 커밋 범위와
+  무관해서 포함하지 않고 그대로 둠.
+
 ## 2026-09-04 — Quest Link 연결 끊김은 케이블/하드웨어 이슈 (코드 문제 아님)
 
 - **참고**: 퀘스트 3S 실기기 테스트 중 PC-헤드셋 연결이 중간에 끊기는
