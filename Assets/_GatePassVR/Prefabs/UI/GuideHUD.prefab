@@ -48,7 +48,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: GatePassVR.Runtime::GatePassVR.UI.GuideUIFollow
   target: {fileID: 0}
-  localOffset: {x: 0, y: 0.35, z: 1.3}
+  localOffset: {x: 0, y: 0.02, z: 1.3}
 --- !u!82 &1029827264364065169
 AudioSource:
   m_ObjectHideFlags: 0

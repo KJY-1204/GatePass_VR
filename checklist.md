@@ -36,6 +36,7 @@
 - [ ] `HighlightController` 구현. Owner: 김씨. — `GuideManager.onNoProgressShort` 이벤트에 연동하면 됨(이미 노출됨).
 - [x] 목표 방향 화살표 (`GoalIndicatorArrow`) 구현. Owner: 김씨. — `RadialGaugeVisual`과 동일한 절차적 스프라이트 생성 패턴. 카메라 정면 기준 목표까지의 수평 방향(좌우)만 계산해서 화면 위 화살표 아이콘을 Z축 회전시킴. `SetGoal(Transform)`으로 목표 갱신, null이면 자동 숨김. `GuideHUD` Prefab에 포함되어 공용으로 재사용 가능. `TestMap_Quest`에서 `GuideManager.initialMainText`/`GoalIndicatorArrow.initialGoal`로 시작 상태 설정 + 패드 3개의 `onHoldCompleted`에 다음 목표 텍스트/화살표 갱신을 추가 연결(Point & Hold 완료 시 다음 목표로 자동 전환). Play Mode에서 이벤트를 코드로 직접 호출해 텍스트/화살표 전환 확인, EditMode 테스트 11개 통과. **실기기에서 실제 패드 조준으로 확인 필요**. 이 하드와이어링은 `ScenarioManager`/`ScenarioStep`이 생기면 Step 데이터 기반으로 교체해야 함.
   - **2026-09-11 개선**: 화살표를 단순 삼각형 → 몸통+화살촉 모양으로 변경. 위치를 패널 안 구석 → 패널 위쪽 바깥으로 이동. `GuideUIFollow.localOffset`을 눈높이 아래(`y=-0.1`)에서 위(`y=0.35`)로 올려서 안내 패널이 컨트롤러 조준 영역(정면~하단)을 덜 가리게 함. 공용 프리팹의 `Affordance Callouts Left/Right`(Grab/Turn 등 컨트롤러 버튼 안내 툴팁)를 비활성화. Play Mode 스크린샷으로 확인, EditMode 테스트 11개 통과. **실기기에서 실제 조준선이 안 가려지는지 확인 필요**.
+  - **2026-09-11 되돌림 (헤드락 UI 함정)**: 오프셋을 `0.35`로 올린 게 "고개를 움직여도 UI를 확인할 수 없다"는 새 문제를 만듦 — 완전 헤드락 UI는 오프셋만큼 항상 시야에서 벗어난 채 고정돼서, 그 방향으로 고개를 돌려도 UI가 똑같이 회전해 절대 못 잡음. `localOffset=(0,0.02,1.3)`로 거의 정중앙에 되돌림. 자세한 원인은 `context-notes.md` 참고. Play Mode 정면 스크린샷으로 확인, EditMode 테스트 11개 통과.
 - [ ] Placement Zone 기본 구조 구현. Owner: 이씨. 김씨 구조 검토.
 - [ ] Hand-over 시스템 구현 (`HandOverZone`). Owner: 김씨.
 - [ ] Scanner 기능 구현 (`ScannerZone`, 순서 검증). Owner: 김씨.
