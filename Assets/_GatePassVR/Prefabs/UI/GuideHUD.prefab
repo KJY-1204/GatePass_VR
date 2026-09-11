@@ -48,7 +48,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: GatePassVR.Runtime::GatePassVR.UI.GuideUIFollow
   target: {fileID: 0}
-  localOffset: {x: 0, y: -0.1, z: 1.3}
+  localOffset: {x: 0, y: 0.35, z: 1.3}
 --- !u!82 &1029827264364065169
 AudioSource:
   m_ObjectHideFlags: 0
@@ -163,6 +163,8 @@ MonoBehaviour:
   audioSource: {fileID: 1029827264364065169}
   shortThreshold: 5
   longThreshold: 10
+  initialMainText: 
+  initialHintText: 
   onNoProgressShort:
     m_PersistentCalls:
       m_Calls: []
@@ -202,11 +204,11 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 7919775408394188270}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 1, y: 1}
-  m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -15, y: -15}
-  m_SizeDelta: {x: 70, y: 70}
-  m_Pivot: {x: 1, y: 1}
+  m_AnchorMin: {x: 0.5, y: 1}
+  m_AnchorMax: {x: 0.5, y: 1}
+  m_AnchoredPosition: {x: 0, y: 20}
+  m_SizeDelta: {x: 90, y: 90}
+  m_Pivot: {x: 0.5, y: 0}
 --- !u!222 &5686961027078841411
 CanvasRenderer:
   m_ObjectHideFlags: 0
