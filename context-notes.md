@@ -58,6 +58,69 @@
   감안하고, 완벽한 방향보다 "이 정도면 충분히 자연스럽다"는 실용적
   기준으로 타협할 필요가 있다.
 
+## 2026-09-11 — 팔뚝 스텁 제거, 목표 텍스트 UI 입력 + 방향 화살표 구현
+
+- **배경**: 손목 늘어남 문제를 계속 쫓기보다, 사용자가 방향을 전환함 —
+  "팔뚝 스텁을 없애자. 그리고 UI에 목표가 입력되도록 하고 어디를 봐야
+  하는지 화살표로 표시하게 해줘." 손목 미세조정은 일단 중단하고 실제
+  가이드 기능(목표 텍스트 + 방향 화살표)으로 넘어감.
+- **결정 1**: `LeftWristCap`/`RightWristCap`(캡슐형 팔뚝 스텁)을 공용
+  프리팹에서 완전히 삭제. 손목 늘어남 문제는 당분간 미해결 상태로 남음
+  (다음에 다시 다룰 때는 이 세션의 교훈 — 큰 회전 편차나 임시방편 커버
+  대신 원인 자체를 다시 봐야 함 — 참고할 것).
+- **결정 2**: `GoalIndicatorArrow`(`Scripts/Guidance`, `RadialGaugeVisual`과
+  동일한 "코드로 스프라이트 생성" 패턴)를 새로 만듦. 위쪽을 향하는 삼각형
+  텍스처를 절차적으로 생성하고, `LateUpdate`에서 `Camera.main.forward`와
+  목표 방향(수평 성분만, `y=0`으로 눌러서 좌우 회전만 사용) 사이의
+  `Vector3.SignedAngle`을 구해 화살표 아이콘을 Z축으로 회전시킨다.
+  `SetGoal(Transform)` API만 노출 — null이면 자동으로 숨겨짐(`SetActive`).
+  `GuideHUD` Prefab의 Canvas 우상단에 노란색 삼각형 아이콘으로 배치.
+  - 수평 성분만 쓰는 이유: 위/아래(고개 숙임)까지 화살표로 표현하면 VR에서
+    혼란스러울 수 있어서, 좌우로 "어느 쪽을 봐야 하는지"만 안내하는 게
+    §13 UX 규칙("현재 목적지와 다음 행동이 항상 명확")에 더 맞다고 판단.
+- **결정 3**: `GuideManager`에 `initialMainText`/`initialHintText`
+  필드를 추가해서 `Awake()`에서 값이 있으면 자동으로 `SetGuide()`를
+  호출하게 함(`GoalIndicatorArrow`의 `initialGoal` 패턴과 동일 — 씬을
+  플레이하자마자 재안내 타이머까지 정상적으로 시작됨). 또한
+  `SetMainText(string)` 편의 메서드를 추가함 — **UnityEvent의 Persistent
+  Listener(Inspector에서 고정 인자로 연결하는 방식)는 정적 파라미터가
+  1개인 메서드만 지원한다**(bool/int/float/string/Object 중 하나, 여러 개
+  섞어서 쓸 수 없음)는 걸 이번에 직접 겪으며 확인함 — `SetGuide(string,
+  string, AudioClip)`처럼 3개짜리는 Persistent Listener로 못 묶어서,
+  텍스트만 바꾸는 1-파라미터 버전을 별도로 만들었다(힌트 텍스트는 이
+  스모크 테스트 씬에서는 매 단계 동일해서 안 건드림).
+- **적용 (`TestMap_Quest` 스모크 테스트 씬)**: 기존 3개 패드
+  (`Pad_ToGrabZone → Pad_ToOpenArea → Pad_BackToStart` 왕복 루프)의
+  `onHoldCompleted`에 기존 `FadeMoveController.MoveTo` 리스너 외에
+  `GuideManager.SetMainText(다음 목표 문구)` + `GoalIndicatorArrow.
+  SetGoal(다음 목표 Waypoint)`를 추가로 연결(`UnityEditor.Events.
+  UnityEventTools.AddStringPersistentListener`/`AddObjectPersistentListener`
+  사용, 기존 `AddObjectPersistentListener<Transform>` 패턴과 동일).
+  `GuideHUD`의 `initialMainText="그랩 존으로 이동하세요"`, `GoalIndicatorArrow.
+  initialGoal=WaypointGrabZone`으로 시작 상태 설정.
+  - **중요한 실수와 교훈**: 한글 문자열을 코드에 직접 리터럴로 쓰면
+    `execute_code`의 `codedom` 컴파일러가 인코딩을 깨뜨린다는 걸 이번에도
+    겪음(예: "오픈"이 "오튰"으로 깨짐). `\uXXXX` 유니코드 이스케이프를
+    직접 손으로 계산하다가도 실수해서 한 번 틀렸음(예: "픈"을 `튰`으로
+    잘못 계산, 실제로는 `픈`) — **Python 같은 도구로 정확한 코드포인트를
+    미리 계산해서 이스케이프 문자열을 만든 뒤 코드에 붙여넣는 방식**으로
+    해결함. 다음에도 한글 문자열을 `execute_code`로 다룰 때는 이 방식을
+    쓸 것(수작업 계산 금지).
+- **검증 결과 (Play Mode)**: 씬 시작 시 "그랩 존으로 이동하세요" +
+  "패드를 가리키고 홀드하세요" 텍스트와 노란 화살표가 정상 표시됨.
+  `Pad_ToGrabZone.onHoldCompleted`를 코드로 직접 `Invoke`해서 시뮬레이션한
+  결과 텍스트가 "오픈 에어리어로 이동하세요"로 갱신되고 화살표도 새 목표
+  방향으로 다시 회전하는 것을 스크린샷으로 확인. 콘솔 에러 0건, EditMode
+  테스트 11개 통과.
+  - **미검증**: 실제 컨트롤러로 패드를 조준해서 `onHoldCompleted`가 자연스럽게
+    발생했을 때도 동일하게 동작하는지는 실기기에서 확인 필요(이번 검증은
+    이벤트를 코드로 직접 호출한 시뮬레이션).
+- **다음 세션이 알아야 할 것**: 이 목표 텍스트/화살표 연결은 지금은
+  `TestMap_Quest`의 3개 패드에 하드코딩되어 있다. `ScenarioManager`/
+  `ScenarioStep`이 생기면 이 Inspector 하드와이어링은 제거하고 Step 데이터
+  기반으로 대체해야 한다(Point & Hold/Fade 때와 동일한 패턴 — 지금은
+  스모크 테스트용 임시 연결).
+
 ## 2026-09-11 — 손목 캡을 작은 구 → 큰 캡슐형 "팔뚝 스텁"으로 확장
 
 - **배경**: 작은 구(球) 캡을 붙였는데도 사용자가 "회전하면 손목이 늘어나고,

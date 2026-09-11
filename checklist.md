@@ -25,6 +25,7 @@
   - **2026-09-11 근본 원인 수정 (미검증, 확신도 높음)**: 회전값만 바꿔서는 "양손이 왼손"인 문제가 절대 안 풀리는 이유를 찾음 — `Right Controller Visual`의 `-1` X 미러 스케일이 이미 스스로 올바르게 미러링된 오른손 메쉬 데이터를 **또 한 번 미러링해서 원래(왼손과 같은 모양)로 되돌리고 있었음**(이중 미러 = 미러 없음). `J_Right.localScale=(-1,1,1)`로 부모 미러를 상쇄(`lossyScale=(1,1,1)`)하고, 손가락 구부림 방향 실측(스크린샷 대신)으로 손등/손바닥 축을 다시 확인해서 `J_Right.localRotation=(275.44,71.50,101.67)`, `J_Left.localRotation=(90,180,0)`으로 설정. 실측 결과 양손 손가락 방향 정확히 일치, 엄지 방향 정확히 반대(진짜 미러 쌍) 확인, 스크린샷도 일치. 자세한 계산은 `context-notes.md` 참고. **실기기 확인 필요** — 특히 고무줄 현상이 이번엔 재발하지 않는지.
   - **2026-09-11 손목 고무줄 현상은 별개 원인 (미검증)**: 방향/모양은 고쳐졌지만 손목 늘어남은 그대로 재현됨 — 회전/미러와 무관한, 메쉬 스키닝(정점 절반 이상이 다중 본 블렌딩) 한계로 판단. 사용자 제안대로 `Left/Right Controller`(리지드) 밑에 `LeftWristCap`/`RightWristCap`(단순 Sphere, 손 메쉬와 동일 머티리얼)을 붙여서 손목 이음새를 가림. **실기기 확인 필요**.
   - **2026-09-11 캡을 구→캡슐(팔뚝 스텁)로 확장 (미검증)**: 구가 너무 작았다는 사용자 피드백("회전하면 손목이 늘어나고 손목을 자연스럽게 없앨 수는 없을까")에 따라, 캡을 더 크고 뒤로 뻗는 캡슐 형태(`localScale=(0.06,0.09,0.06)`, 손목 안쪽까지 겹치도록 위치 조정)로 교체. 작업 중 재질이 조용히 기본값으로 되돌아가는 버그를 발견해 재적용함(자세한 내용은 `context-notes.md`). 씬 파일에 기능적으로 무해한 낡은 오버라이드 4줄이 남아있는데 정상임(YAML 직접 수정 안 함). **실기기 확인 필요**.
+  - **2026-09-11 팔뚝 스텁 제거 (사용자 지시)**: 손목 늘어남 문제를 더 쫓지 않고 캡슐 스텁을 완전히 삭제함. **손목 늘어남 문제는 미해결 상태로 남음.**
 - [x] 손가락 구부림(그립) 애니메이션 구현 (`FingerCurlAnimator` + `HandGripInputDriver`). Owner: 김씨. — PolyOne 손 에셋에 그립 애니메이션이 없어서 절차적으로 대체: 손가락 관절(5개 손가락 × 4관절 × 양손 = 40개)을 로컬 X축으로 굽혀 펴짐↔주먹 사이를 보간. 컨트롤러의 Grip/Trigger 입력값(둘 중 큰 값)으로 구동. Play Mode에서 `SetCurl(0)/(0.5)/(1)` 직접 호출로 시각 확인(스크린샷) — 펴짐/절반 굽힘/완전 주먹 전부 자연스럽게 보임. **미검증**: 실제 컨트롤러 Grip/Trigger를 눌렀을 때 실기기에서 확인 필요.
 
 ## Phase B. Reusable Interaction and Guidance
@@ -33,6 +34,7 @@
 - [ ] `ScenarioStep` 데이터 구조 정의. Owner: 김씨.
 - [x] `GuideManager` 구현 (안내 텍스트/음성, 재안내 타이밍 5초/10초 규칙). Owner: 김씨. — `GuideManager`(MonoBehaviour, 단일 진입점) + `GuideReguideTimer`(순수 C# 상태 로직, EditMode 테스트 5개 통과). `SetGuide(main, hint, voice)`/`ReportProgress()`/`ClearGuide()` API. 5초 무반응 시 `onNoProgressShort`(향후 HighlightController 연동용 이벤트만 노출), 10초 무반응 시 `onNoProgressLong` + 안내 음성 재생. `TestMap_Quest`에서 Play Mode로 실제 5초/10초 타이머 발동, 텍스트 갱신, ReportProgress 리셋까지 전부 검증 완료.
 - [ ] `HighlightController` 구현. Owner: 김씨. — `GuideManager.onNoProgressShort` 이벤트에 연동하면 됨(이미 노출됨).
+- [x] 목표 방향 화살표 (`GoalIndicatorArrow`) 구현. Owner: 김씨. — `RadialGaugeVisual`과 동일한 절차적 스프라이트 생성 패턴. 카메라 정면 기준 목표까지의 수평 방향(좌우)만 계산해서 화면 위 화살표 아이콘을 Z축 회전시킴. `SetGoal(Transform)`으로 목표 갱신, null이면 자동 숨김. `GuideHUD` Prefab에 포함되어 공용으로 재사용 가능. `TestMap_Quest`에서 `GuideManager.initialMainText`/`GoalIndicatorArrow.initialGoal`로 시작 상태 설정 + 패드 3개의 `onHoldCompleted`에 다음 목표 텍스트/화살표 갱신을 추가 연결(Point & Hold 완료 시 다음 목표로 자동 전환). Play Mode에서 이벤트를 코드로 직접 호출해 텍스트/화살표 전환 확인, EditMode 테스트 11개 통과. **실기기에서 실제 패드 조준으로 확인 필요**. 이 하드와이어링은 `ScenarioManager`/`ScenarioStep`이 생기면 Step 데이터 기반으로 교체해야 함.
 - [ ] Placement Zone 기본 구조 구현. Owner: 이씨. 김씨 구조 검토.
 - [ ] Hand-over 시스템 구현 (`HandOverZone`). Owner: 김씨.
 - [ ] Scanner 기능 구현 (`ScannerZone`, 순서 검증). Owner: 김씨.

@@ -299,6 +299,30 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+      - m_Target: {fileID: 1507939090}
+        m_TargetAssemblyTypeName: GatePassVR.Guidance.GuideManager, GatePassVR.Runtime
+        m_MethodName: SetMainText
+        m_Mode: 5
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: "\uC624\uD508 \uC5D0\uC5B4\uB9AC\uC5B4\uB85C \uC774\uB3D9\uD558\uC138\uC694"
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 6730990648749548012}
+        m_TargetAssemblyTypeName: GatePassVR.Guidance.GoalIndicatorArrow, GatePassVR.Runtime
+        m_MethodName: SetGoal
+        m_Mode: 2
+        m_Arguments:
+          m_ObjectArgument: {fileID: 621657401}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Transform, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &239623910
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -724,14 +748,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 0}
-      propertyPath: 'm_Materials.Array.data[0]'
-      value: 
-      objectReference: {fileID: 2100000, guid: b8ed2d350dffa5849929237115ec9a5c, type: 2}
-    - target: {fileID: 0}
-      propertyPath: 'm_Materials.Array.data[0]'
-      value: 
-      objectReference: {fileID: 2100000, guid: b8ed2d350dffa5849929237115ec9a5c, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1054,6 +1070,30 @@ MonoBehaviour:
         m_Mode: 2
         m_Arguments:
           m_ObjectArgument: {fileID: 621657401}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Transform, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 1507939090}
+        m_TargetAssemblyTypeName: GatePassVR.Guidance.GuideManager, GatePassVR.Runtime
+        m_MethodName: SetMainText
+        m_Mode: 5
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: "\uC2DC\uC791 \uC9C0\uC810\uC73C\uB85C \uB3CC\uC544\uAC00\uC138\uC694"
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 6730990648749548012}
+        m_TargetAssemblyTypeName: GatePassVR.Guidance.GoalIndicatorArrow, GatePassVR.Runtime
+        m_MethodName: SetGoal
+        m_Mode: 2
+        m_Arguments:
+          m_ObjectArgument: {fileID: 840631546}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Transform, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
@@ -1607,7 +1647,7 @@ Transform:
   m_GameObject: {fileID: 1139916415}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -5.3, y: 1, z: 3}
+  m_LocalPosition: {x: -5.3, y: 1, z: 4.56}
   m_LocalScale: {x: 0.2, y: 0.2, z: 0.2}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1758,6 +1798,17 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1507939090 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2699592655169413057, guid: ab15751b7ec3b6744a2dfcf28fb4d8ee, type: 3}
+  m_PrefabInstance: {fileID: 6730990648749548011}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1b9a495ab4dc5e54aa55320325e24421, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: GatePassVR.Runtime::GatePassVR.Guidance.GuideManager
 --- !u!1 &1542222905
 GameObject:
   m_ObjectHideFlags: 0
@@ -2023,7 +2074,7 @@ Transform:
   m_GameObject: {fileID: 1542222905}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -4.7, y: 1, z: 3}
+  m_LocalPosition: {x: -4.7, y: 1, z: 4.56}
   m_LocalScale: {x: 0.2, y: 0.2, z: 0.2}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2135,7 +2186,7 @@ Transform:
   m_GameObject: {fileID: 1544485918}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -5, y: 0.45, z: 3}
+  m_LocalPosition: {x: -5, y: 0.45, z: 4.56}
   m_LocalScale: {x: 1.2, y: 0.9, z: 0.8}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2315,6 +2366,30 @@ MonoBehaviour:
         m_Mode: 2
         m_Arguments:
           m_ObjectArgument: {fileID: 840631546}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Transform, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 1507939090}
+        m_TargetAssemblyTypeName: GatePassVR.Guidance.GuideManager, GatePassVR.Runtime
+        m_MethodName: SetMainText
+        m_Mode: 5
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: "\uADF8\uB7A9 \uC874\uC73C\uB85C \uC774\uB3D9\uD558\uC138\uC694"
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 6730990648749548012}
+        m_TargetAssemblyTypeName: GatePassVR.Guidance.GoalIndicatorArrow, GatePassVR.Runtime
+        m_MethodName: SetGoal
+        m_Mode: 2
+        m_Arguments:
+          m_ObjectArgument: {fileID: 1382665773}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Transform, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
@@ -2777,11 +2852,34 @@ PrefabInstance:
       propertyPath: m_Name
       value: GuideHUD
       objectReference: {fileID: 0}
+    - target: {fileID: 2699592655169413057, guid: ab15751b7ec3b6744a2dfcf28fb4d8ee, type: 3}
+      propertyPath: initialHintText
+      value: "\uD328\uB4DC\uB97C \uAC00\uB9AC\uD0A4\uACE0 \uD640\uB4DC\uD558\uC138\uC694"
+      objectReference: {fileID: 0}
+    - target: {fileID: 2699592655169413057, guid: ab15751b7ec3b6744a2dfcf28fb4d8ee, type: 3}
+      propertyPath: initialMainText
+      value: "\uADF8\uB7A9 \uC874\uC73C\uB85C \uC774\uB3D9\uD558\uC138\uC694"
+      objectReference: {fileID: 0}
+    - target: {fileID: 3779105033350269616, guid: ab15751b7ec3b6744a2dfcf28fb4d8ee, type: 3}
+      propertyPath: initialGoal
+      value: 
+      objectReference: {fileID: 1382665773}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ab15751b7ec3b6744a2dfcf28fb4d8ee, type: 3}
+--- !u!114 &6730990648749548012 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3779105033350269616, guid: ab15751b7ec3b6744a2dfcf28fb4d8ee, type: 3}
+  m_PrefabInstance: {fileID: 6730990648749548011}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 397daa5e895e812468df1ddc48496d94, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: GatePassVR.Runtime::GatePassVR.Guidance.GoalIndicatorArrow
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
