@@ -14,6 +14,8 @@ namespace GatePassVR.Guidance
         [SerializeField] private AudioSource audioSource;
         [SerializeField] private float shortThreshold = 5f;
         [SerializeField] private float longThreshold = 10f;
+        [SerializeField] private string initialMainText;
+        [SerializeField] private string initialHintText;
 
         [SerializeField] private UnityEvent onNoProgressShort;
         [SerializeField] private UnityEvent onNoProgressLong;
@@ -26,6 +28,11 @@ namespace GatePassVR.Guidance
         {
             Instance = this;
             timer = new GuideReguideTimer(shortThreshold, longThreshold);
+
+            if (!string.IsNullOrEmpty(initialMainText))
+            {
+                SetGuide(initialMainText, initialHintText);
+            }
         }
 
         private void OnDestroy()
@@ -85,6 +92,19 @@ namespace GatePassVR.Guidance
         // 진행 신호를 받으면 재안내 타이머만 초기화한다 (텍스트/음성은 바꾸지 않음).
         public void ReportProgress()
         {
+            timer.Reset();
+        }
+
+        // UnityEvent Persistent Listener는 정적 파라미터 1개짜리 메서드만 연결할 수 있어서 만든 편의 메서드.
+        // 힌트 텍스트/음성은 그대로 둔다.
+        public void SetMainText(string main)
+        {
+            if (mainText != null)
+            {
+                mainText.text = main;
+            }
+
+            hasActiveGuide = true;
             timer.Reset();
         }
 
