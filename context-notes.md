@@ -58,6 +58,39 @@
   감안하고, 완벽한 방향보다 "이 정도면 충분히 자연스럽다"는 실용적
   기준으로 타협할 필요가 있다.
 
+## 2026-09-11 — 화살표가 "도착지"가 아니라 "지금 홀드해야 할 패드"를 가리키도록 수정
+
+- **배경**: 사용자 피드백 — "화살표는 내가 작업해야 되는 곳을 쉽게 바라볼
+  수 있게, 예를 들면 테스트맵에서는 내 위치 근처 홀드해야 되는 것이 있는
+  방향으로 가리켜야 돼." 지금까지는 `GoalIndicatorArrow`가 Point & Hold
+  완료 **후 도착하는 Waypoint**를 가리키고 있었는데, 사용자가 원하는 건
+  **지금 바로 조준해서 홀드해야 하는 패드 자체**를 가리키는 것.
+- **결정**: `TestMap_Quest`의 각 패드 `onHoldCompleted`에 이미 연결해 둔
+  `GoalIndicatorArrow.SetGoal(...)` 리스너의 대상을 Waypoint에서 **다음
+  패드**로 교체함:
+  - `GuideHUD.initialGoal`: `WaypointGrabZone` → `Pad_ToGrabZone`
+  - `Pad_ToGrabZone.onHoldCompleted[2].SetGoal`: `WaypointOpenArea` →
+    `Pad_ToOpenArea`
+  - `Pad_ToOpenArea.onHoldCompleted[2].SetGoal`: `WaypointStart` →
+    `Pad_BackToStart`
+  - `Pad_BackToStart.onHoldCompleted[2].SetGoal`: `WaypointGrabZone` →
+    `Pad_ToGrabZone` (루프 복귀)
+  - `MoveTo`(인덱스 0)와 `SetMainText`(인덱스 1) 리스너는 그대로 둠 —
+    이동 목적지 텍스트("그랩 존으로 이동하세요" 등)는 여전히 도착지
+    기준으로 안내하고, 화살표만 "지금 눈으로 찾아야 할 물체"를 가리키게
+    분리함. 이 구분이 합리적이라고 판단: 텍스트는 "어디로 가는지", 화살표는
+    "지금 뭘 봐야 하는지".
+  - `SerializedObject`로 각 리스너의 `m_Arguments.m_ObjectArgument`만
+    직접 교체(리스너를 삭제/재생성하지 않고 대상만 바꿈 — 더 간단하고
+    안전함).
+- **검증 (Play Mode)**: 시작 시 화살표가 `Pad_ToGrabZone` 방향(왼쪽)을
+  가리킴. `Pad_ToGrabZone.onHoldCompleted`를 코드로 직접 호출해 시뮬레이션한
+  결과 플레이어가 `WaypointGrabZone`으로 이동하고, 화살표가 `Pad_ToOpenArea`
+  방향(위쪽)으로 다시 회전하는 것을 스크린샷으로 확인. 텍스트는 여전히
+  "오픈 에어리어로 이동하세요"로 정상 표시. EditMode 테스트 11개 통과,
+  콘솔 에러 0건.
+  - **미검증**: 실제 패드 조준으로도 동일하게 동작하는지 실기기 확인 필요.
+
 ## 2026-09-11 — 헤드락 UI의 함정: "위로 옮기면" 고개를 들어도 절대 못 본다
 
 - **배경**: 바로 앞 항목에서 조준선을 안 가리려고 안내 패널을
