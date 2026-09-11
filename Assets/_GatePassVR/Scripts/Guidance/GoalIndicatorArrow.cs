@@ -50,7 +50,7 @@ namespace GatePassVR.Guidance
             transform.localRotation = Quaternion.Euler(0f, 0f, -signedAngle);
         }
 
-        // 코드로 생성한 위쪽을 향하는 삼각형 화살표 스프라이트. 실제 아트가 들어오면 Inspector에서 sprite를 직접 지정해 대체하면 된다.
+        // 코드로 생성한 위쪽을 향하는 화살표(화살촉+몸통) 스프라이트. 실제 아트가 들어오면 Inspector에서 sprite를 직접 지정해 대체하면 된다.
         private static Sprite GetOrCreateArrowSprite()
         {
             if (arrowSpriteCache != null)
@@ -59,6 +59,9 @@ namespace GatePassVR.Guidance
             }
 
             const int size = 128;
+            const float headStartT = 0.5f; // 화살촉이 시작되는 높이(0=아래, 1=위)
+            const float headBaseHalfWidth = size * 0.36f;
+            const float shaftHalfWidth = size * 0.13f;
 
             var texture = new Texture2D(size, size, TextureFormat.RGBA32, false)
             {
@@ -70,13 +73,23 @@ namespace GatePassVR.Guidance
             for (int y = 0; y < size; y++)
             {
                 float t = y / (float)(size - 1);
-                float halfWidth = (1f - t) * (size * 0.4f);
+                float halfWidth;
+
+                if (t < headStartT)
+                {
+                    halfWidth = shaftHalfWidth;
+                }
+                else
+                {
+                    float headT = (t - headStartT) / (1f - headStartT);
+                    halfWidth = Mathf.Lerp(headBaseHalfWidth, 0f, headT);
+                }
 
                 for (int x = 0; x < size; x++)
                 {
                     float dx = Mathf.Abs(x - size * 0.5f);
-                    bool inTriangle = dx <= halfWidth;
-                    pixels[y * size + x] = inTriangle ? new Color32(255, 255, 255, 255) : new Color32(255, 255, 255, 0);
+                    bool inArrow = dx <= halfWidth;
+                    pixels[y * size + x] = inArrow ? new Color32(255, 255, 255, 255) : new Color32(255, 255, 255, 0);
                 }
             }
 
