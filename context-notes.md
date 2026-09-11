@@ -2,6 +2,59 @@
 
 결정 사항과 이유를 시간순으로 누적 기록한다. 완료된 내용을 삭제하지 않는다.
 
+## 2026-09-11 — VR 손 모델이 실제 Quest 화면에서 안 보이는 문제 조사 및 `updateWhenOffscreen` 수정 (실기기 미검증)
+
+- **배경**: 사용자가 "전에 손모양 에셋적용한거 안보이는데"라고 보고. 처음엔 Unity
+  Editor Game View에서 트래킹 데이터 없이 카메라/컨트롤러가 전부 같은 좌표에
+  겹쳐서 안 보이는 것으로 추정했으나, 사용자가 "메타퀘스트 화면으로도 안보였어"라고
+  정정 — 실기기에서도 재현되는 진짜 문제.
+- **구조 확인**: `Complete XR Origin Set Up Hands Variant` 프리팹 자체는 정상.
+  `UniversalController` 비활성, `J_Left`/`J_Right` 본과 `SM_HandsVR_Male`
+  SkinnedMeshRenderer 전부 활성 상태, 머티리얼도 `Universal Render Pipeline/Lit`
+  (URP 호환), 본 45개 정상 바인딩, 씬 인스턴스도 프리팹에 정상 연결(Connected)됨.
+  Main Camera의 cullingMask도 `Everything`, nearClip 0.01 — 레이어/클리핑 문제
+  아님.
+- **의심되는 원인 발견**: `XROrigin.CameraYOffset = 1.36144`,
+  `CameraFloorOffsetObject = "Camera Offset"`. 이 값은 트래킹 모드가 `Device`일
+  때만(즉 위치 트래킹이 없을 때 눈높이를 흉내 내는 fallback으로만) `Camera
+  Offset`의 로컬 Y에 적용되고, Quest처럼 `Floor` 모드로 트래킹되면 Unity가 이
+  오프셋을 0으로 되돌린다(머리 높이는 실제 트래킹 포즈가 직접 제공하므로).
+  - `SM_HandsVR_Male`(렌더러)이 있는 `VR Hands Visual`은 `Camera Offset` 바로
+    밑의 **정적** 컨테이너라서 트래킹 포즈를 직접 받지 않는다. 반면 실제로 메쉬를
+    구부리는 `J_Left`/`J_Right` 본은 `Left/Right Controller` 밑에 있어서 실제
+    컨트롤러 트래킹 포즈를 받는다.
+  - Editor(트래킹 없음)에서는 `Camera Offset.y`가 fallback 값 1.36 그대로 남아있어
+    렌더러 컨테이너와 본 위치가 우연히 거의 일치했지만, **실기기(Floor 트래킹)에서는
+    `Camera Offset.y`가 0으로 바뀌면서 렌더러 컨테이너만 바닥 높이로 내려가고
+    본은 실제 손 높이(~1.3m)에 남아 큰 차이가 생길 것으로 추정**.
+  - `SM_HandsVR_Male.updateWhenOffscreen`이 `false`(기본값)였다. 이 값이 꺼져
+    있으면 Unity가 한 번 "화면 밖"으로 판정한 뒤로는 바운즈/스키닝 갱신을 멈추기
+    때문에, 렌더러 컨테이너와 실제 본 위치가 크게 벌어지는 이런 구조에서는
+    "한 번 잘못 판정되면 계속 안 보이는" 현상이 생기기 쉽다.
+- **적용한 수정**: `Complete XR Origin Set Up Hands Variant` 프리팹의
+  `SM_HandsVR_Male` → `SkinnedMeshRenderer.updateWhenOffscreen`을 `true`로 변경
+  (Prefab Stage에서 직접 수정 후 저장). 매 프레임 바운즈를 다시 계산하게 해서
+  "한 번 오프스크린으로 고정되는" 문제를 막는 표준적인 수정.
+- **검증 결과와 한계**: Play Mode에서 `VR Hands Visual` 컨테이너를 강제로 1.36m
+  아래로 옮기고(실기기의 예상 상황을 흉내냄) 옆에서 스크린샷을 찍었을 때, 손은
+  여전히 진짜 본 위치(옮기지 않은 `J_Left`/`J_Right` 근처)에 정상적으로 렌더링됨을
+  확인. 다만 `updateWhenOffscreen`을 다시 `false`로 돌려서 같은 스크린샷을
+  찍어도 결과가 똑같아서(이 스크린샷 방식이 카메라의 프레임 간 "이미 화면
+  밖이었다"는 상태를 재현하지 못하는 것으로 보임), **이 스크린샷 테스트로는
+  "한 번 오프스크린 판정 후 고정" 버그 자체를 Editor에서 직접 재현/반증하지
+  못했다.** 즉 이번 수정은 원인 진단상 근거는 확실하지만(Camera Offset 오프셋
+  구조 문제는 실제로 확인됨), **수정이 실제로 화면에 손을 다시 보이게 하는지는
+  사용자가 실기기(Quest)에서 재확인해야 한다.**
+  - EditMode 테스트 11개 전부 통과, 컴파일/콘솔 에러 0건 — 이건 이 수정과 무관한
+    회귀가 없다는 것만 보장함.
+- **다음 세션/사용자 확인 필요**: Quest에서 다시 테스트했을 때도 손이 안 보이면,
+  (1) 실제로 어떤 방식으로 테스트했는지(Quest Link/Air Link로 PC 빌드 스트리밍
+  vs Android APK 설치) 먼저 확인할 것 — 오래된 APK를 쓰고 있었다면 이번 손 모델
+  변경 자체가 그 빌드에 없을 수 있음. (2) 그래도 안 보이면 Android/URP 빌드에서
+  셰이더 변형이 스트립됐을 가능성, 또는 `VR Hands Visual` 컨테이너를 트래킹되는
+  오브젝트(예: `Main Camera`나 각 Controller) 밑으로 재구성하는 더 근본적인 수정을
+  검토해야 함.
+
 ## 2026-09-11 — `GuideManager`/`GuideHUD` 가이드 UI 구현, 프로젝트 최초 한글 TMP 폰트 확보(임시), `.gitignore` 버그 수정
 
 - **배경**: 사용자가 "가이드 UI를 만들자"고 요청. 시작 전 두 가지 설계 선택지를
