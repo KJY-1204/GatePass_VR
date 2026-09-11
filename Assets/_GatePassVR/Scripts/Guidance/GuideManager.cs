@@ -1,0 +1,122 @@
+// 현재 단계의 안내 텍스트/음성 표시와 무반응 시 재안내를 담당하는 단일 진입점
+using TMPro;
+using UnityEngine;
+using UnityEngine.Events;
+
+namespace GatePassVR.Guidance
+{
+    public class GuideManager : MonoBehaviour
+    {
+        public static GuideManager Instance { get; private set; }
+
+        [SerializeField] private TMP_Text mainText;
+        [SerializeField] private TMP_Text hintText;
+        [SerializeField] private AudioSource audioSource;
+        [SerializeField] private float shortThreshold = 5f;
+        [SerializeField] private float longThreshold = 10f;
+
+        [SerializeField] private UnityEvent onNoProgressShort;
+        [SerializeField] private UnityEvent onNoProgressLong;
+
+        private GuideReguideTimer timer;
+        private AudioClip currentVoice;
+        private bool hasActiveGuide;
+
+        private void Awake()
+        {
+            Instance = this;
+            timer = new GuideReguideTimer(shortThreshold, longThreshold);
+        }
+
+        private void OnDestroy()
+        {
+            if (Instance == this)
+            {
+                Instance = null;
+            }
+        }
+
+        private void Update()
+        {
+            if (!hasActiveGuide)
+            {
+                return;
+            }
+
+            var (shortJustFired, longJustFired) = timer.Tick(Time.deltaTime);
+
+            if (shortJustFired)
+            {
+                onNoProgressShort?.Invoke();
+            }
+
+            if (longJustFired)
+            {
+                onNoProgressLong?.Invoke();
+                ReplayVoice();
+            }
+        }
+
+        // 새 안내를 표시하고 재안내 타이머를 초기화한다. 다른 스크립트는 UI Text를 직접 건드리지 말고 이 메서드만 호출한다.
+        public void SetGuide(string main, string hint = null, AudioClip voice = null)
+        {
+            if (mainText != null)
+            {
+                mainText.text = main;
+            }
+
+            if (hintText != null)
+            {
+                hintText.text = hint ?? string.Empty;
+            }
+
+            currentVoice = voice;
+            hasActiveGuide = true;
+            timer.Reset();
+
+            if (voice != null && audioSource != null)
+            {
+                audioSource.Stop();
+                audioSource.clip = voice;
+                audioSource.Play();
+            }
+        }
+
+        // 진행 신호를 받으면 재안내 타이머만 초기화한다 (텍스트/음성은 바꾸지 않음).
+        public void ReportProgress()
+        {
+            timer.Reset();
+        }
+
+        public void ClearGuide()
+        {
+            hasActiveGuide = false;
+            currentVoice = null;
+
+            if (mainText != null)
+            {
+                mainText.text = string.Empty;
+            }
+
+            if (hintText != null)
+            {
+                hintText.text = string.Empty;
+            }
+
+            if (audioSource != null)
+            {
+                audioSource.Stop();
+            }
+        }
+
+        private void ReplayVoice()
+        {
+            if (currentVoice != null && audioSource != null)
+            {
+                audioSource.Stop();
+                audioSource.clip = currentVoice;
+                audioSource.Play();
+            }
+        }
+    }
+}

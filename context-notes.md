@@ -2,6 +2,102 @@
 
 결정 사항과 이유를 시간순으로 누적 기록한다. 완료된 내용을 삭제하지 않는다.
 
+## 2026-09-11 — `GuideManager`/`GuideHUD` 가이드 UI 구현, 프로젝트 최초 한글 TMP 폰트 확보(임시), `.gitignore` 버그 수정
+
+- **배경**: 사용자가 "가이드 UI를 만들자"고 요청. 시작 전 두 가지 설계 선택지를
+  물어봤고, 사용자가 각각 추천안을 선택함: (1) UI 배치는 카메라 추종 HUD
+  (World Space Canvas를 카메라 자식처럼 고정 로컬 오프셋으로 따라다니게),
+  (2) CLAUDE.md §13 규칙 9·10번(5초 무반응 시 강조, 10초 무반응 시 재안내)의
+  타이머 로직도 이번 범위에 포함.
+- **결정**: `HoldGaugeState`와 동일한 패턴으로 `GuideReguideTimer`(순수 C#
+  상태 클래스, `Scripts/Guidance`)를 분리해 EditMode 테스트 가능하게 함.
+  `Tick(deltaTime)`가 `(shortJustFired, longJustFired)` 튜플을 반환하고,
+  각 임계값은 한 번만 발동(`ShortFired`/`LongFired` 플래그)한다. 큰
+  deltaTime 한 번에 두 임계값을 동시에 넘는 경우(에디터 프레임 드랍 등)도
+  테스트로 커버함(`Tick_LargeDeltaCrossingBothThresholds_FiresBothInSameTick`).
+  - EditMode 테스트 5개(`GuideReguideTimerTests`) 전부 통과. 기존
+    `HoldGaugeStateTests` 6개 포함 총 11개 통과.
+- **결정**: `GuideManager`(MonoBehaviour, `Scripts/Guidance`, `static
+  Instance`)를 CLAUDE.md §25 "GuideManager를 단일 진입점으로 사용" 규칙대로
+  구현. `mainText`/`hintText`(TMP_Text)와 `audioSource`를 직접 참조하고,
+  다른 스크립트는 `SetGuide(main, hint, voice)` / `ReportProgress()` /
+  `ClearGuide()`만 호출하도록 함 — UI Text를 씬 여기저기서 직접 건드리지
+  않게 하는 게 목적.
+  - `onNoProgressShort`/`onNoProgressLong`은 파라미터 없는 `UnityEvent`로
+    Inspector에 노출만 해두고 내부 구현은 하지 않음. `HighlightController`가
+    아직 없어서 지금은 아무도 구독하지 않지만, 다음에 만들 때 이 이벤트에
+    연결하면 됨(체크리스트에 메모).
+  - 10초 재안내(`onNoProgressLong`)는 이벤트 발행 외에 `GuideManager`가
+    직접 `currentVoice` 클립을 재생(`ReplayVoice()`)해서 "안내 음성을
+    다시 제공"(§13 규칙 10) 요구를 자체 충족시킴. `SetGuide`/`ReportProgress`
+    호출 시 타이머가 `Reset()`되어 재발동하지 않는다.
+- **결정**: `GuideUIFollow`(`Scripts/UI`, 범용 재사용 컴포넌트)를 만들어
+  월드스페이스 UI가 카메라 앞 고정 로컬 오프셋(기본 `(0,-0.1,1.3)`)에서
+  카메라 회전을 그대로 따라가게 함. `Camera.main` 탐색은 `LateUpdate`에서
+  `followTarget`이 아직 null일 때만 시도하고 한 번 찾으면 캐시 — CLAUDE.md
+  §24 "Update에서 매 프레임 Find 계열 검색 금지"를 지키기 위함.
+- **`GuideHUD` Prefab** (`Assets/_GatePassVR/Prefabs/UI/GuideHUD.prefab`,
+  `TestMap_Quest`에 인스턴스 배치됨): 루트에 `GuideUIFollow`+`AudioSource`+
+  `GuideManager`, 자식 `Canvas`(World Space, 700x260 @ localScale 0.0018 ≈
+  실제 1.26m×0.47m)에 반투명 배경(`Background`, 맨 뒤 sibling)과
+  `MainGuideText`(56pt, 굵게, 위쪽 55%)/`HintText`(32pt, 흰색 alpha 0.65,
+  아래쪽 45%) 2단 구성. §25 "화면당 핵심 안내 1개, 보조 안내는 시각적으로
+  약하게"를 그대로 반영.
+- **중요한 발견: 프로젝트에 한글 TMP 폰트가 전혀 없었음.** 기본
+  `LiberationSans SDF`는 라틴 전용이라 한글이 `□□□`로 깨짐. 이번이
+  프로젝트에서 한글 텍스트가 실제로 화면에 들어가는 첫 시점이라 즉시
+  드러남. 사용자에게 물어봤고, "Windows 시스템 폰트(맑은 고딕)로 임시
+  생성"을 선택함.
+  - `TMP_FontAsset.CreateFontAsset(Font)` (레거시, `Font.
+    CreateDynamicFontFromOSFont` 경유)는 원인 불명으로 계속 null 반환 —
+    Play Mode 여부와 무관하게 실패함(Play Mode 중 시도했다가 안 돼서
+    Edit Mode로 나와서도 재시도했지만 동일). 대신 `TMP_FontAsset.
+    CreateFontAsset(string familyName, string styleName, int pointSize)`
+    오버로드(TMP의 최신 FontEngine 기반 OS 폰트 조회 경로)로 성공.
+    `atlasPopulationMode`가 자동으로 `DynamicOS`로 잡힘.
+  - 결과물: `Assets/_GatePassVR/Art/Temp/Fonts/MalgunGothic SDF.asset`.
+    `Art/Temp`는 CLAUDE.md §15가 정의한 "완성 전 임시 아트" 폴더라 위치는
+    맞지만, **이 폰트 에셋 자체가 임시다.**
+  - **중요한 한계(다음 세션 필수 확인)**: `DynamicOS` 모드는 OS에 실제
+    설치된 폰트를 런타임에 참조하는 방식이라 **Windows 에디터/Windows PC
+    빌드에서만 동작**한다. Quest/Pico(Android)에는 "맑은 고딕"이 설치되어
+    있지 않으므로 **Quest 실기기 빌드에서는 다시 한글이 깨질 것으로
+    예상됨(미검증이 아니라 구조적으로 확실히 깨짐)**. 최종 빌드는 물론,
+    다음 Quest 실기기 테스트에 가이드 텍스트가 포함된다면 그 전에 반드시
+    OFL 등 명확한 라이선스의 한글 폰트 파일(예: Pretendard, Noto Sans KR)을
+    프로젝트에 넣고 폰트 에셋을 교체해야 한다. 사용자에게 파일을 요청하거나
+    직접 받아서 넣어야 함(외부 다운로드는 사용자 승인 필요).
+- **버그 발견 및 수정: `.gitignore`의 `Temp/`가 앵커링되지 않아
+  `Assets/_GatePassVR/Art/Temp/`까지 통째로 무시되고 있었음.** 방금 만든
+  폰트 에셋을 커밋하려다가 `git status`에 전혀 안 잡히는 걸 보고 발견함.
+  Git의 unanchored 패턴(슬래시로 시작하지 않는 규칙)은 트리 전체에서 같은
+  이름의 디렉터리에 모두 매치되므로, Unity 에디터 캐시용 루트
+  `Temp/`뿐 아니라 프로젝트가 의도적으로 만든 `Art/Temp/` 콘텐츠 폴더까지
+  전부 무시 대상이 됐던 것. `/Temp/`로 앵커링해서 루트의 Unity 캐시
+  폴더만 무시하도록 수정. **다음 세션 참고**: 이 버그 때문에 지금까지
+  누군가 `Art/Temp`에 뭔가 넣었더라도 전부 git에 안 잡혔을 가능성이
+  있음(이번 세션 확인 결과 아직 아무도 안 넣은 상태였어서 유실된 콘텐츠는
+  없어 보임).
+- **검증 결과**: `TestMap_Quest`에서 Play Mode로 실제 검증.
+  - `GuideManager.Instance.SetGuide("체크인 카운터로 이동하세요", "레이로
+    카운터를 가리키고 홀드하세요", null)` 호출 → 한글 텍스트 정상 렌더링,
+    카메라 추종 HUD가 시야 앞에 정확히 배치됨을 스크린샷으로 확인.
+  - 리플렉션으로 내부 `timer` 상태와 `onNoProgressShort`/`onNoProgressLong`
+    에 임시 리스너를 붙여서, 툴 호출 왕복 지연 및 실제 12초 대기를 통해
+    **진짜 시간 경과로 5초/10초 임계값이 각각 정확히 한 번씩 발동**하는
+    것을 콘솔 로그로 확인(중복 발동 없음). `ReportProgress()` 호출 시
+    `elapsed`가 0으로 리셋되고 플래그도 초기화되는 것 확인.
+  - Console 에러/경고 0건. EditMode 테스트 11개(기존 6 + 신규 5) 전부 통과.
+  - **여전히 미검증**: 실제 Quest 컨트롤러로 조준하는 것과는 무관한
+    영역이라 실기기 테스트 항목은 아님. 다만 위에 적은 한글 폰트의 Quest
+    빌드 미대응은 다음 실기기 테스트 전에 반드시 해결해야 함.
+- **아직 연결 안 한 것 (의도적)**: `GuideManager.ReportProgress()`를 호출하는
+  실제 소스가 아직 없다(예: `PointAndHoldTarget.onProgressChanged`를 여기에
+  연결하는 것). `HighlightController`도 아직 없어서 `onNoProgressShort`를
+  구독하는 곳이 없다. 둘 다 `ScenarioManager`/`HighlightController`가 생기면
+  Step 단위로 Inspector에서 연결할 콘텐츠 조립 작업이라 지금은 각 컴포넌트
+  단위까지만 완성해 둠 (Point & Hold/Fade 때와 동일한 패턴).
+
 ## 2026-09-04 — 손가락 구부림(그립) 애니메이션을 절차적으로 구현
 
 - **배경**: PolyOne 손 에셋에 그립/트리거 반응 애니메이션이 없다는 걸
@@ -408,6 +504,28 @@
 
 ## 다음 세션이 알아야 할 것
 
+- **Phase B 진행 상황 (2026-09-11 기준)**: `GuideManager`(`Scripts/Guidance`)
+  와 `GuideHUD` Prefab(`Prefabs/UI/GuideHUD.prefab`, `TestMap_Quest`에 인스턴스
+  있음)이 완료·검증됨. `ScenarioManager`/`ScenarioStep`/`HighlightController`/
+  Placement Zone/Hand-over/Scanner/ResetController는 전부 아직 미착수.
+- **최우선 후속 조치 — 한글 폰트 교체**: 지금 쓰는 `Assets/_GatePassVR/Art/
+  Temp/Fonts/MalgunGothic SDF.asset`은 Windows 시스템 폰트를 `DynamicOS`
+  모드로 참조하는 임시 폰트라 **Quest/Pico(Android) 빌드에서는 한글이 다시
+  깨진다.** 가이드 텍스트가 들어간 상태로 다음 Quest 실기기 테스트를 하기
+  전에, OFL 등 배포 가능한 라이선스의 한글 폰트 파일(Pretendard, Noto Sans
+  KR 등)을 사용자에게 받거나 승인받아 프로젝트에 넣고, 그 파일로 TMP
+  Font Asset을 다시 만들어 `GuideHUD`의 `MainGuideText`/`HintText`에
+  재할당해야 한다. (Malgun Gothic 버전은 Windows 에디터/PC 빌드 확인용으로만
+  유효.)
+- `GuideManager.Instance.SetGuide(main, hint, voice)`가 프로젝트에서 유일한
+  가이드 텍스트 진입점이다. 다른 스크립트가 `TMP_Text.text`를 직접 바꾸지
+  않도록 할 것. `ReportProgress()`는 아직 아무 상호작용에도 연결되어 있지
+  않음 — `ScenarioManager`를 만들 때 `PointAndHoldTarget.onProgressChanged`
+  같은 진행 신호를 여기로 이어주면 된다. `onNoProgressShort` 이벤트는
+  `HighlightController`를 만들 때 그대로 구독하면 됨.
+- `.gitignore`의 `Temp/` → `/Temp/` 수정 완료(앵커링 안 된 패턴이 `Assets/
+  _GatePassVR/Art/Temp/`까지 무시하던 버그). 앞으로 `Art/Temp`에 넣는
+  콘텐츠는 정상적으로 git에 잡힌다.
 - `plan.md`, `checklist.md`는 이번에 처음 생성됨. **Phase A는 사실상 완료
   상태**: Git/GitHub, `_GatePassVR` 폴더 구조, Point & Hold(`PointAndHoldTarget`
   + `RadialGaugeVisual`), Fade(`FadeMoveController`), Grab(기존 XRI 기능)
