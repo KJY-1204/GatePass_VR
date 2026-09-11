@@ -23,14 +23,14 @@
 
 - [ ] `ScenarioManager` 구현 (Step 진행, 중복 성공 방지, 전체/단계 Reset). Owner: 김씨.
 - [ ] `ScenarioStep` 데이터 구조 정의. Owner: 김씨.
-- [ ] `GuideManager` 구현 (안내 텍스트/음성, 재안내 타이밍 5초/10초 규칙). Owner: 김씨.
-- [ ] `HighlightController` 구현. Owner: 김씨.
+- [x] `GuideManager` 구현 (안내 텍스트/음성, 재안내 타이밍 5초/10초 규칙). Owner: 김씨. — `GuideManager`(MonoBehaviour, 단일 진입점) + `GuideReguideTimer`(순수 C# 상태 로직, EditMode 테스트 5개 통과). `SetGuide(main, hint, voice)`/`ReportProgress()`/`ClearGuide()` API. 5초 무반응 시 `onNoProgressShort`(향후 HighlightController 연동용 이벤트만 노출), 10초 무반응 시 `onNoProgressLong` + 안내 음성 재생. `TestMap_Quest`에서 Play Mode로 실제 5초/10초 타이머 발동, 텍스트 갱신, ReportProgress 리셋까지 전부 검증 완료.
+- [ ] `HighlightController` 구현. Owner: 김씨. — `GuideManager.onNoProgressShort` 이벤트에 연동하면 됨(이미 노출됨).
 - [ ] Placement Zone 기본 구조 구현. Owner: 이씨. 김씨 구조 검토.
 - [ ] Hand-over 시스템 구현 (`HandOverZone`). Owner: 김씨.
 - [ ] Scanner 기능 구현 (`ScannerZone`, 순서 검증). Owner: 김씨.
 - [ ] `ResetController` 구현 (분실/오배치/진행불능 복구). Owner: 김씨.
 - [ ] 공통 기능 Prefab 제작. Owner: 김씨.
-- [ ] 가이드 UI 구성과 표시 제어 (`GuideManager` 단일 진입점). Owner: 김씨.
+- [x] 가이드 UI 구성과 표시 제어 (`GuideManager` 단일 진입점). Owner: 김씨. — `GuideHUD` Prefab(`Prefabs/UI/GuideHUD.prefab`): 카메라 추종 World Space Canvas(`GuideUIFollow`), 메인 안내 텍스트(크게)/보조 힌트 텍스트(약하게) 2단 구성 + 반투명 배경. `TestMap_Quest`에 인스턴스 배치해 실제 Play Mode에서 한글 렌더링/레이아웃 확인. **미해결**: 임시 한글 폰트(`MalgunGothic SDF`, DynamicOS)는 Windows 전용 — Quest/Android 빌드에서는 한글이 깨질 것. 최종 빌드 전 반드시 임베디드 한글 폰트(OFL 라이선스 등)로 교체 필요.
 - [ ] Point & Hold Progress UI Prefab 제작. Owner: 김씨.
 
 ## Phase C. Content Assembly
