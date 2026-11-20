@@ -327,3 +327,17 @@
 - 이씨 문서는 docs/lee/에 둔다(이씨 결정). 공항 모델 받는 방법은 docs/lee/README.md. 팀 README·루트 문서는 바꾸지 않았다.
 - 팀에 이미 있는 _GatePassVR/Art/Temp.meta는 팀 것을 그대로 두었다.
 - 커밋 기록은 옮기지 않았다. 개인 main(681e665)의 파일 최종 상태를 복사했다.
+
+### 1차 검증 (2026-11-20, C:\GatePass_VR, Unity 6000.3.10f1)
+
+- Compile Error 0개, Console Error 0개. 경고는 공항 모델 FBX의 self-intersecting 폴리곤 경고(개인 프로젝트와 같음)와
+  OpenXRPackageSettings 임포트 경고뿐.
+- Airport_Lee: GameObject 1,045개, Missing Script 0, Missing Prefab 0. FadeMoveController 1, PlacementZone 5, NpcStation 4, XR Device Simulator 연결됨.
+- Missing Reference 34개는 전부 팀 VR 템플릿 프리팹 6개(Complete XR Origin Set Up Hands Variant, Tutorial Player, Spatial Panel Scroll,
+  List Item Slider/Dropdown/Toggle) 안에 원래 있는 것이다. 프리팹 자체를 열어 세어도 같은 34개라서 이전 때문에 생긴 문제가 아니다.
+- EditMode 테스트 20개 통과(김씨 GuideReguideTimer 5, HoldGaugeState 6, PlacementZoneState 9).
+- 라이트를 다시 Bake했다(ProgressiveGPU). 새 라이트맵·LightingData의 GUID는 팀 파일과 겹치지 않는다.
+  Scene 저장 때 템플릿 UI 프리팹 인스턴스의 RectTransform 값(앵커·크기·위치) 21곳이 레이아웃 계산값으로 바뀌었다.
+- 미검증: Validate Colliders, Dest Tour 7개 지점 이동(둘 다 1차에서 뺀 Editor 도구가 필요). Play 모드 동선 확인, Quest 3S 실기기.
+- Unity가 열리면서 팀 설정 파일 5개(OpenXRPackageSettings, ProjectSettings, ShaderGraphSettings, 패키지 설정 2개)를 자동으로 바꿨다.
+  1차에 넣지 않았다. C:\Users\User-29\GatePass_VR는 예전 팀 사본(main 12c2b3b, 6000.3.23f1)이라 쓰지 않는다.
