@@ -71,3 +71,11 @@ Thumbs.db
 
 # Android
 *.androidlib
+
+# Sketchfab 공항 에셋 (Free Standard 라이선스: 원본 파일 재배포 금지)
+# .meta 파일은 올려서 Scene 연결 ID를 유지한다. docs/lee/README-airport-model.md의 다운로드 안내 참고.
+/Assets/Environments/source/Airport7_FINALc_EscenaMontada.fbx
+/Assets/Environments/textures/Texture_airport256b.png
+
+# 배치 점검용 캡처 이미지 (이씨 Editor 도구 GatePass > Capture Dest Views 결과)
+/LayoutCaptures/
