@@ -108,3 +108,21 @@ TestMap_Quest Pad에 직접 연결된 MoveTo·SetMainText·SetGoal을 Step 데�
 3. 틀린 물건(GrabSphere)을 넣어도 진행되지 않는다 → Play.
 4. Hand-over 후 B 버튼 Reset 시 물건이 원위치로 돌아가 다시 시도할 수 있다 → Play.
 5. Compile Error 0, EditMode 전체 통과.
+
+## 현재 작업 (2026-11-23) — Scanner (`ScannerZone`)
+
+이씨 문구표 S4-1(여권 스캔)·S4-2(탑승권 스캔), 순서 오류 힌트 "먼저 여권을 대 주세요"에 맞춘다.
+
+동작:
+- `sequence`(물건 + scanId)를 순서대로 스캔한다. 지금 차례 물건이 스캔 영역(판 + 위 높이)에 `scanTime`초 동안
+  계속 있으면 스캔 성공 1회 → `onScanned`, `LastScanId` 갱신, 다음 차례로. 손에 든 채여도 된다.
+- 차례가 아닌 물건(순서가 뒤인 물건 포함)이 들어오면 `onWrongItem` 1회(들어올 때마다). 스캔 처리하지 않는다.
+- 스캔한 물건은 고정하지 않는다(입국심사에서 여권을 다시 쓴다).
+- ScenarioManager는 `ReportScanned(zone)`으로 `LastScanId`를 성공 ID로 받는다.
+- Reset: 진행 중이면 스캔한 진행은 유지하고 머무른 시간만 초기화, 전부 마쳤으면 처음부터.
+
+완료 기준:
+1. 순서 준수, 머무름 시간, 1회 성공, 틀린 물건 1회 보고, Reset 규칙 → EditMode 테스트.
+2. TestMap_Quest에서 탑승권(구)을 먼저 대면 진행되지 않고, 여권(큐브) → 탑승권(구) 순서로 Step이 진행된다 → 시뮬레이터 Play.
+3. 여권 스캔 뒤 B Reset해도 탑승권 Step에서 계속 진행할 수 있다 → Play.
+4. Compile Error 0, EditMode 전체 통과.

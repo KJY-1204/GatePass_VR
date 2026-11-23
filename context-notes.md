@@ -2,6 +2,70 @@
 
 결정 사항과 이유를 시간순으로 누적 기록한다. 완료된 내용을 삭제하지 않는다.
 
+## 2026-11-23 — Scanner (`ScannerZone`) 구현
+
+브랜치 `feature/kim-scanner`. 체크리스트 Phase B 다음 항목이다.
+
+### 결정과 이유
+
+- **이씨 문구표에 맞춤**: S4-1·S4-2 "초록 칸 위에 잠시 대세요", 순서 오류
+  힌트 "먼저 여권을 대 주세요"에 맞췄다. 지금 차례 물건이 영역(판 + 위
+  0.3m)에 `scanTime`(기본 0.5초) 동안 계속 있으면 스캔 성공이다. 손에 든
+  채여도 된다. 중간에 빠지면 시간은 처음부터 다시 잰다.
+- **순서는 Scanner가 지킨다**(§22.1): 스캐너 하나가 `sequence`(물건 +
+  scanId)를 가진다. 차례가 아닌 물건은 들어올 때마다 `onWrongItem`만 1회
+  보내고 스캔하지 않는다. 이 이벤트에 힌트("먼저 여권을…")를 붙이면 된다
+  (Highlight·힌트 작업 때).
+- **물건을 고정하지 않는다**: 여권은 입국심사(S8)에서 다시 쓴다(이씨 기록
+  과 같은 이유).
+- **Step과 차례 맞추기**(중요): 스캐너는 Step과 무관하게 항상 동작한다.
+  그래서 스캔 Step 전에 큐브를 칸 위로 지나가게 하면 스캐너만 앞서 나가
+  S1에서 구를 기다리는 막힘이 생긴다. 그래서 ScenarioManager에
+  `onStepEnteredId`(UnityEvent<string>, Step의 successId 전달)를 추가하고
+  `ScannerZone.AlignToScanId`를 연결해, Step에 들어오면 그 scanId 차례로
+  맞춘다. Play에서 H1 중 미리 스캔 → S1 진입 시 0으로 다시 맞춰진 것을
+  확인했다. 다른 상호작용도 같은 문제가 생기면 같은 이벤트를 쓴다.
+- **Reset**: 진행 중이면 스캔한 진행을 유지한다(되감으면 Step과 어긋남).
+  전부 마친 뒤에는 처음부터 다시 스캔하게 한다. Step 차례 맞추기도 Reset
+  재진입 때 같이 동작한다.
+- **이미 스캔한 물건은 틀린 물건이 아니다**: 처음엔 여권을 스캔한 직후,
+  칸 위에 남은 여권이 탑승권 차례에선 "틀린 물건"이 되어 성공음 바로 뒤에
+  재시도음(SFX_Retry)이 났다. 앞 차례 물건은 틀린 물건으로 세지 않게
+  고쳤고, Play로 재확인했다.
+- 효과음: 이씨 `SFX_Scan.wav`(onScanned), `SFX_Retry.wav`(onWrongItem)를
+  테스트 스캐너 받침대 AudioSource의 `PlayOneShot`에 Inspector로 연결했다.
+
+### TestMap_Quest 변경
+
+- 그랩 존 왼쪽에 `TestScanner`(ScannerStand + AudioSource, Zone_TestScan)를
+  추가했다. 순서: GrabCube(`Scan_TestPassport`) → GrabSphere
+  (`Scan_TestBoardingPass`).
+- Step 순서: T1 → H1 → H2 → S1(큐브 스캔) → S2(구 스캔) → T2 → T3.
+
+### 검증
+
+- 실패 테스트(타입 없음)를 먼저 확인했다. 차례 맞추기(JumpTo) 테스트는
+  구현과 함께 넣었다. EditMode 50개 통과.
+- 시뮬레이터 Play(물건은 코드로 한 번만 배치):
+  - H1 중 큐브를 스캐너에 올림 → 스캐너만 1로 앞서 나감, Step은 H1 유지
+    (보고는 무시됨).
+  - 건네기·돌려받기 후 S1 진입 → 스캐너 차례 0으로 다시 맞춰짐.
+  - 구를 먼저 올림 → onWrongItem 1회, S1 유지.
+  - 큐브 스캔 → S2. 큐브를 칸 위에 1.5초 그대로 둬도 틀린 물건 신호 없음.
+  - S2에서 B → S2와 스캐너 차례 1 유지.
+  - 구 스캔 → T2, 스캐너 완료. 콘솔 Error 0건.
+- 테스트 중 구를 큐브와 같은 자리에 겹쳐 놓아 튕겨나가 맵 밖(y=-981)으로
+  떨어졌다. 배치 오류지만 실제로도 물건이 맵 밖으로 떨어질 수 있으니
+  ResetController 등록이 필요하다(TestMap의 GrabCube·GrabSphere는 등록됨).
+- **미검증**: 손에 든 채로 0.5초 대는 스캔(시뮬레이터로 손 위치를 움직이기
+  어려워 내려놓기만 확인했다). Quest 실기기.
+
+### 다음
+
+- Airport_Lee `Zone_Scan_Boarding`에 ScannerZone을 붙이고 순서(여권 →
+  탑승권, scanId는 guide-texts ID S4-1·S4-2 권장)를 설정하는 작업은 이씨
+  씬이다. 이씨에게 공유한다.
+
 ## 2026-11-23 — Hand-over (`HandOverZone`) 구현
 
 브랜치 `feature/kim-hand-over`. 체크리스트 Phase B 다음 항목이다.
