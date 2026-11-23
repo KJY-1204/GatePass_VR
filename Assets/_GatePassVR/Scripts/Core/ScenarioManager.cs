@@ -79,6 +79,24 @@ namespace GatePassVR.Core
             }
         }
 
+        // HandOverZone.onHandedOver에 Inspector로 연결한다.
+        public void ReportHandedOver(HandOverZone zone)
+        {
+            if (zone != null)
+            {
+                ReportSuccess(zone.ZoneId);
+            }
+        }
+
+        // HandOverZone.onReturnTaken에 Inspector로 연결한다. 성공 ID는 zoneId + "_Returned".
+        public void ReportReturnTaken(HandOverZone zone)
+        {
+            if (zone != null)
+            {
+                ReportSuccess(zone.ReturnTakenId);
+            }
+        }
+
         // 현재 Step을 처음부터 다시 안내한다. 시나리오를 다 마친 뒤라면 첫 Step부터 다시 시작한다.
         public void ResetStep()
         {
