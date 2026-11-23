@@ -30,8 +30,8 @@
 
 ## Phase B. Reusable Interaction and Guidance
 
-- [ ] `ScenarioManager` 구현 (Step 진행, 중복 성공 방지, 전체/단계 Reset). Owner: 김씨.
-- [ ] `ScenarioStep` 데이터 구조 정의. Owner: 김씨.
+- [x] `ScenarioManager` 구현 (Step 진행, 중복 성공 방지, 전체/단계 Reset). Owner: 김씨. — **2026-11-23** `Scripts/Core/ScenarioManager.cs` + 순수 상태 `ScenarioProgress`(EditMode 7개). 상호작용은 `ReportSuccess(id)`/`ReportHoldCompleted`/`ReportPlaced`로 성공만 알리고, 현재 Step ID가 아니면 무시한다. Step 진입 시 `GuideManager.SetGuide` + 화살표 + `onStepEntered`, 성공 시 이동 목적지가 있으면 Fade 이동. `ResetStep()`은 현재 Step 재안내, 완료 후엔 첫 Step부터. `TestMap_Quest`의 Pad 하드와이어(MoveTo/SetMainText/SetGoal)를 Step 3개로 교체. 시뮬레이터 Play로 오답 Pad 무시, 3단계 진행, 완료 문구·화살표 숨김, 완료 후 Hold 무시, B 버튼 재시작 확인. EditMode 29개 통과. 실기기 미검증.
+- [x] `ScenarioStep` 데이터 구조 정의. Owner: 김씨. — stepId, successId, guideMain/Hint/Voice, goalTarget, moveDestination. Inspector에서 순서·문구 조정.
 - [x] `GuideManager` 구현 (안내 텍스트/음성, 재안내 타이밍 5초/10초 규칙). Owner: 김씨. — `GuideManager`(MonoBehaviour, 단일 진입점) + `GuideReguideTimer`(순수 C# 상태 로직, EditMode 테스트 5개 통과). `SetGuide(main, hint, voice)`/`ReportProgress()`/`ClearGuide()` API. 5초 무반응 시 `onNoProgressShort`(향후 HighlightController 연동용 이벤트만 노출), 10초 무반응 시 `onNoProgressLong` + 안내 음성 재생. `TestMap_Quest`에서 Play Mode로 실제 5초/10초 타이머 발동, 텍스트 갱신, ReportProgress 리셋까지 전부 검증 완료.
 - [ ] `HighlightController` 구현. Owner: 김씨. — `GuideManager.onNoProgressShort` 이벤트에 연동하면 됨(이미 노출됨).
 - [x] 목표 방향 화살표 (`GoalIndicatorArrow`) 구현. Owner: 김씨. — `RadialGaugeVisual`과 동일한 절차적 스프라이트 생성 패턴. 카메라 정면 기준 목표까지의 수평 방향(좌우)만 계산해서 화면 위 화살표 아이콘을 Z축 회전시킴. `SetGoal(Transform)`으로 목표 갱신, null이면 자동 숨김. `GuideHUD` Prefab에 포함되어 공용으로 재사용 가능. `TestMap_Quest`에서 `GuideManager.initialMainText`/`GoalIndicatorArrow.initialGoal`로 시작 상태 설정 + 패드 3개의 `onHoldCompleted`에 다음 목표 텍스트/화살표 갱신을 추가 연결(Point & Hold 완료 시 다음 목표로 자동 전환). Play Mode에서 이벤트를 코드로 직접 호출해 텍스트/화살표 전환 확인, EditMode 테스트 11개 통과. **실기기에서 실제 패드 조준으로 확인 필요**. 이 하드와이어링은 `ScenarioManager`/`ScenarioStep`이 생기면 Step 데이터 기반으로 교체해야 함.

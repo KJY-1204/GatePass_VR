@@ -69,3 +69,24 @@ context-notes 2026-11-23에 기록한 버그 3건을 고친다. ScenarioManager�
 5. 컨트롤러 B/Y(secondaryButton)로 `ResetCurrent()`가 실행된다 → 입력 시뮬레이션
    Play 확인. 실기기 확인은 미검증으로 남긴다.
 6. Compile Error 0개, 기존 EditMode 테스트 포함 전체 통과.
+
+## 현재 작업 (2026-11-23) — ScenarioManager·ScenarioStep (Phase B, M1 선행)
+
+상호작용은 성공 사실과 ID만 알리고 진행 순서는 ScenarioManager가 정한다(§16.2).
+TestMap_Quest Pad에 직접 연결된 MoveTo·SetMainText·SetGoal을 Step 데이터로 옮긴다.
+
+구조:
+- `ScenarioProgress` (순수 C#): 성공 ID 목록, 현재 인덱스, 맞는 ID만 1회 진행, 끝 처리, 처음부터 다시.
+- `ScenarioStep` (Serializable): stepId, successId, 안내 메인·힌트·음성, 화살표 목표, 성공 시 이동 목적지(선택).
+- `ScenarioManager`: Step 진입 시 `GuideManager.SetGuide` + `GoalIndicatorArrow.SetGoal` + onStepEntered,
+  성공 시 이동 목적지가 있으면 `FadeMoveController.MoveTo` 후 다음 Step. `ReportSuccess(string)`,
+  `ReportHoldCompleted(PointAndHoldTarget)`, `ReportPlaced(PlacementZone)` 진입점. `ResetStep()`은 현재 Step
+  재진입(끝났으면 첫 Step부터).
+
+완료 기준:
+1. 현재 Step의 ID가 아닌 성공 보고는 무시된다 → EditMode 테스트 + Play(다른 Pad Hold 시 이동 없음).
+2. 같은 성공이 두 번 와도 한 Step만 진행된다 → EditMode 테스트.
+3. 마지막 Step 뒤에는 보고가 무시되고 완료 이벤트가 1회 난다 → EditMode 테스트.
+4. TestMap_Quest가 Step 데이터만으로 기존과 같은 순서·문구·화살표·이동을 한다 → 시뮬레이터 Play.
+5. B 버튼 Reset 시 현재 Step 안내가 다시 표시되고, 완료 후 Reset 시 첫 Step부터 다시 시작한다 → Play.
+6. Compile Error 0, EditMode 전체 통과.
