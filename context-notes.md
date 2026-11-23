@@ -2,6 +2,53 @@
 
 결정 사항과 이유를 시간순으로 누적 기록한다. 완료된 내용을 삭제하지 않는다.
 
+## 2026-11-23 — ResetController 추가, Point & Hold 재사용 버그 2건 수정
+
+브랜치 `feature/kim-reset-controller`. 아래 "검증 결과" 항목의 버그 3건을
+고쳤다. 사용자 결정은 두 가지다. 범위는 ResetController만 만들고
+ScenarioManager는 다음 작업으로 미뤘다. Reset 입력은 컨트롤러 B/Y 버튼이다.
+
+### 결정과 이유
+
+- **hover 유지 수정 위치**: `HoldGaugeState.Reset()`은 그대로 두고(기존
+  테스트가 hover=false를 기대함), `PointAndHoldTarget.ResetHold()`에서
+  Reset 직후 `SetHovering(interactable.isHovered)`로 다시 맞춘다. 상태
+  로직은 순수하게 두고, XRI hover 사실은 MonoBehaviour가 알려주는 구조다.
+- **두 바퀴째 진행 불능 해결 방식**: Pad가 완료 후 스스로 풀리게 하지
+  않았다. 대신 `FadeMoveController.onMoveCompleted → ResetController.
+  RearmHoldTargets()`로 이동이 끝날 때 등록된 Pad를 모두 재활성화한다.
+  이동 중(Fade)에는 `MoveTo`가 무시되고 Pad도 completed 상태라 중복
+  이동이 생기지 않는다.
+- **입력**: XRI 샘플 액션 에셋에 secondaryButton 액션이 없다. 외부 에셋을
+  직접 고치지 않는 규칙(§15) 때문에 ResetController 안에 인라인
+  `InputAction`(`<XRController>{LeftHand}/secondaryButton`, `{RightHand}`)을
+  기본값으로 넣었다. Inspector에서 바꿀 수 있다. 이를 위해
+  `GatePassVR.Runtime.asmdef`에 `Unity.InputSystem` 참조를 추가했다.
+- **Reset 순서**: Zone 해제 → 물건 원위치 → Pad 재활성화. Zone이 물건을
+  kinematic·Grab 비활성으로 고정하고 있어서 먼저 풀어야 한다. 손에 든
+  물건은 `CancelInteractableSelection`으로 먼저 놓게 한다.
+- ResetController는 Inspector 배열로 대상을 등록한다. ScenarioManager가
+  생기면 현재 Step의 대상만 넘기는 방식으로 바꾼다.
+
+### 검증
+
+- Compile Error 0개. EditMode 22개 통과(새 테스트 2개: 완료 후 Reset하면
+  다시 한 번 완료됨, Reset 후 hover를 다시 켜면 재충전됨).
+- TestMap_Quest Play(런타임 XR Device Simulator, 컨트롤러 조준은 코드):
+  - Pad 5단계(한 바퀴 반)가 모두 약 1.8초 Hold로 이동했다. 두 바퀴째
+    Pad_ToGrabZone도 정상이다.
+  - Pad를 가리키는 중 progress 0.4에서 `ResetHold()` → 1.2초 뒤 재충전
+    완료 후 이동했다.
+  - 시뮬레이터 오른손 secondaryButton을 누르면 `onReset`이 1회 발생했다.
+    던져 둔 GrabCube가 원위치로 돌아오고 속도 0, Pad 3개 progress 0이다.
+  - NearFar Interactor로 잡은 GrabCube에 `ResetCurrent()` → 놓아지고
+    원위치로 돌아왔으며 몇 프레임 뒤에도 유지되었다.
+  - 콘솔 Error 0건.
+- **미검증**: Quest 실기기에서 실제 B/Y 버튼. `ResetCurrent()`의
+  PlacementZone 해제 경로는 TestMap_Quest에 Zone이 없어 Play로 확인하지
+  못했다(`ResetZone()` 자체는 Airport_Lee 테스트에서 확인함). Airport_Lee는
+  이씨 씬이라 ResetController를 배치하지 않았다.
+
 ## 2026-11-23 — `_GatePassVR/Scenes` 전체 3개 씬 Play 테스트
 
 코드·씬·설정 변경 없음. 세 씬 모두 Play 중 콘솔 Error 0건이었다. 템플릿
