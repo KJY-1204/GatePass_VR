@@ -2,6 +2,59 @@
 
 결정 사항과 이유를 시간순으로 누적 기록한다. 완료된 내용을 삭제하지 않는다.
 
+## 2026-11-23 — `TestMap_Quest` XR Device Simulator 수직 슬라이스 검증 (Reset 미검증, 버그 3건 발견)
+
+코드·씬·설정 변경 없음. 검증만 수행했다.
+
+### 검증 방법
+
+- Unity Editor Play 모드, `TestMap_Quest.unity`.
+- `Assets/XRI/Settings/Resources/XRDeviceSimulatorSettings.asset`의
+  `m_AutomaticallyInstantiateSimulatorPrefab=False`이고 씬에도 시뮬레이터가
+  없어서, Play 중에만 `Assets/Samples/XR Interaction Toolkit/3.5.1/XR Device
+  Simulator/XR Device Simulator.prefab`을 런타임 Instantiate했다(설정 미변경).
+  다음에 시뮬레이터로 테스트하려면 같은 방법을 쓰거나, 팀이 합의하면 자동
+  생성 옵션을 켠다.
+- 마우스 대신 MCP `execute_code`로 시뮬레이터의 `m_RightControllerEuler`와
+  `m_RightControllerState.deviceRotation`을 함께 설정해 Pad를 조준했다.
+  euler 필드만 바꾸면 시뮬레이터가 덮어써서 반영되지 않는다. hover·게이지·
+  이동 판정은 실제 XRI Near-Far Interactor와 프로젝트 컴포넌트가 처리했다.
+- 시뮬레이터 생성 직후 몇 프레임 동안 Left/Right Controller가 비활성이었다가
+  `XRInputModalityManager`가 MotionController 모드로 전환하며 활성화된다.
+
+### 결과
+
+| 항목 | 결과 | 근거 |
+|---|---|---|
+| Ray | 통과 | Near-Far Interactor `interactablesHovered`에 Pad_ToGrabZone |
+| Point & Hold | 통과 | progress 0→1 약 1.2초 선형 충전(`holdDuration=1.2`) |
+| Fade 이동 | 통과 | alpha 0→1 약 0.3초, alpha≈1에서 XR Origin 이동, 1→0 Fade In. 3개 Pad 목적지 모두 정확 |
+| Guide 갱신 | 통과 | 그랩 존 → 오픈 에어리어 → 시작 지점 순서로 갱신, GoalArrow 목표도 함께 갱신 |
+| Reset | **미검증** | 씬에 Reset 수단 없음 |
+| 콘솔 | Error 0건 | 경고는 시뮬레이터 환경의 오디오 드라이버·시선 추적·손 추적 관련뿐 |
+
+Guide 문구는 Hold 완료 순간(Fade Out 시작 전)에 바뀐다. 현재는
+`onHoldCompleted` Persistent Listener로 `GuideHUD.SetMainText`를 직접 부르는
+구조이며 ScenarioManager는 아직 없다.
+
+### 발견한 문제 (미수정)
+
+1. **Reset 수단 없음.** 씬에 `ResetController`/`ScenarioManager`가 없고
+   `PointAndHoldTarget.ResetHold()`를 호출하는 곳이 없다. CLAUDE.md §26에
+   따라 이 Point & Hold Step은 아직 완료로 체크할 수 없다.
+2. **두 바퀴째 진행 불능.** `HoldGaugeState`는 한 번 완료되면
+   `IsCompleted=true`로 남아 다시 차지 않는다. 세 Pad를 돌아 시작 지점으로
+   돌아온 뒤 Pad_ToGrabZone을 Ray로 가리켜도(hovered 확인) 이동하지 않았다.
+3. **Reset 직후 게이지 정지.** Ray가 Pad를 가리키는 중에 `ResetHold()`를
+   부르면 `HoldGaugeState.Reset()`이 `IsHovering=false`로 지워서 3.7초가
+   지나도 progress가 0에 머문다. Ray를 뗐다가 다시 가리키면 정상 충전되어
+   이동했다. 수정할 때는 Reset 후 `interactable.isHovered`로 hover 상태를
+   다시 맞춰야 한다.
+
+수정 방향(사용자 결정 대기): Reset 진입점(ResetController 또는
+ScenarioManager의 Step Reset)을 만들고, `ResetHold()`가 현재 hover 상태를
+유지하도록 고치고, 2·3번에 대한 EditMode 테스트를 추가한다.
+
 ## 2026-09-11 — 오른손 Z축만 180도 추가 (최소 변경 시도, 미검증)
 
 - **배경**: 롤백 직후 사용자가 "손가락이 다시 아래를 바라보고 손등이
