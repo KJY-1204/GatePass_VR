@@ -41,7 +41,7 @@
 - [ ] Placement Zone 기본 구조 구현. Owner: 이씨. 김씨 구조 검토.
 - [ ] Hand-over 시스템 구현 (`HandOverZone`). Owner: 김씨.
 - [ ] Scanner 기능 구현 (`ScannerZone`, 순서 검증). Owner: 김씨.
-- [ ] `ResetController` 구현 (분실/오배치/진행불능 복구). Owner: 김씨.
+- [x] `ResetController` 구현 (분실/오배치/진행불능 복구). Owner: 김씨. — **2026-11-23** `Scripts/Core/ResetController.cs`. `ResetCurrent()`가 등록된 PlacementZone `ResetZone` → Grab 물건 원위치(들고 있으면 먼저 놓게 함, 속도 0) → Pad 게이지 재활성화를 한 번에 한다. 입력은 양손 secondaryButton(B/Y) 인라인 InputAction(샘플 액션 에셋 미수정). `RearmHoldTargets()`를 `FadeMoveController.onMoveCompleted`에 연결해 두 바퀴째 진행 불능을 해결했다. `PointAndHoldTarget.ResetHold()`는 이제 현재 hover 상태를 유지한다. `TestMap_Quest`에 배치(Pad 3개, GrabCube/GrabSphere 등록). Editor XR Device Simulator Play로 확인: 5단계 루프 이동, hover 중 Reset 후 1.2초 재충전, B 버튼으로 onReset 1회, 던진·들고 있는 큐브 원위치. EditMode 22개 통과. **실기기 B/Y 버튼 미검증**. ScenarioManager가 생기면 Step 단위 등록으로 바꿔야 한다. Airport_Lee에는 아직 배치하지 않음(이씨 씬).
 - [ ] 공통 기능 Prefab 제작. Owner: 김씨.
 - [x] 가이드 UI 구성과 표시 제어 (`GuideManager` 단일 진입점). Owner: 김씨. — `GuideHUD` Prefab(`Prefabs/UI/GuideHUD.prefab`): 카메라 추종 World Space Canvas(`GuideUIFollow`), 메인 안내 텍스트(크게)/보조 힌트 텍스트(약하게) 2단 구성 + 반투명 배경. `TestMap_Quest`에 인스턴스 배치해 실제 Play Mode에서 한글 렌더링/레이아웃 확인. **미해결**: 임시 한글 폰트(`MalgunGothic SDF`, DynamicOS)는 Windows 전용 — Quest/Android 빌드에서는 한글이 깨질 것. 최종 빌드 전 반드시 임베디드 한글 폰트(OFL 라이선스 등)로 교체 필요.
 - [ ] Point & Hold Progress UI Prefab 제작. Owner: 김씨.

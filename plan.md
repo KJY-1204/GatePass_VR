@@ -50,3 +50,22 @@ NPC Animation, 실제 공항 1:1 재현, 자유 전체 탐험, 복잡한 NPC AI,
 입국 인터뷰, 멀티플레이/온라인, 실제 항공편 연동, 수하물 무게 게임, 위험물
 탐지 게임, 여권 위조 판별, 세관 신고 시뮬레이션, 비행 시뮬레이션, 대규모
 군중 NPC.
+
+## 현재 작업 (2026-11-23) — ResetController와 Point & Hold 재사용 버그 수정
+
+context-notes 2026-11-23에 기록한 버그 3건을 고친다. ScenarioManager는 이번
+범위가 아니다(사용자 결정).
+
+완료 기준 (테스트 가능한 문장):
+
+1. 완료된 `HoldGaugeState`를 `Reset()`하면 다시 채워서 완료 이벤트를 한 번 더
+   낼 수 있다 → EditMode 테스트.
+2. `PointAndHoldTarget.ResetHold()` 뒤에도 Ray가 계속 가리키고 있으면 게이지가
+   다시 찬다(hover 상태 유지) → TestMap_Quest Play 확인.
+3. `TestMap_Quest`에서 Pad 3개를 한 바퀴 돈 뒤 Pad_ToGrabZone을 다시 가리키면
+   다시 이동한다(이동 완료 시 Pad 재활성화) → 시뮬레이터 Play 확인.
+4. `ResetController.ResetCurrent()`가 등록된 Pad 게이지, Grab 물건 위치(잡고
+   있어도 놓게 하고 원위치), PlacementZone 판정을 한 번에 되돌린다 → Play 확인.
+5. 컨트롤러 B/Y(secondaryButton)로 `ResetCurrent()`가 실행된다 → 입력 시뮬레이션
+   Play 확인. 실기기 확인은 미검증으로 남긴다.
+6. Compile Error 0개, 기존 EditMode 테스트 포함 전체 통과.

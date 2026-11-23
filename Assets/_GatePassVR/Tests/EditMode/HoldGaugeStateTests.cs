@@ -84,5 +84,36 @@ namespace GatePassVR.Tests.EditMode
             Assert.IsFalse(gauge.IsHovering);
             Assert.IsFalse(gauge.IsCompleted);
         }
+
+        [Test]
+        public void Reset_AfterCompleted_AllowsCompletingAgainOnce()
+        {
+            var gauge = new HoldGaugeState(holdDuration: 1f, decayRate: 1f);
+            gauge.SetHovering(true);
+            gauge.Tick(1f);
+
+            gauge.Reset();
+            gauge.SetHovering(true);
+            bool completedAgain = gauge.Tick(1f);
+            bool firedThirdTime = gauge.Tick(1f);
+
+            Assert.IsTrue(completedAgain);
+            Assert.IsFalse(firedThirdTime);
+            Assert.IsTrue(gauge.IsCompleted);
+        }
+
+        [Test]
+        public void Reset_WhileStillHovering_RechargesWhenHoverRestored()
+        {
+            var gauge = new HoldGaugeState(holdDuration: 1f, decayRate: 1f);
+            gauge.SetHovering(true);
+            gauge.Tick(0.5f);
+
+            gauge.Reset();
+            gauge.SetHovering(true); // PointAndHoldTarget.ResetHold가 현재 hover 상태로 다시 맞춘다.
+            gauge.Tick(0.5f);
+
+            Assert.AreEqual(0.5f, gauge.Progress, 0.0001f);
+        }
     }
 }
