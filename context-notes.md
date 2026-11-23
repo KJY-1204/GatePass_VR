@@ -2,6 +2,72 @@
 
 결정 사항과 이유를 시간순으로 누적 기록한다. 완료된 내용을 삭제하지 않는다.
 
+## 2026-11-23 — Hand-over (`HandOverZone`) 구현
+
+브랜치 `feature/kim-hand-over`. 체크리스트 Phase B 다음 항목이다.
+
+### 결정과 이유
+
+- **이씨 문구표에 맞춤**: S2-1·S8-1은 "초록 칸에 여권을 놓아 건네기"라서
+  영역(판 + 위 0.4m)에 들어오면 성공이다. PlacementZone과 다른 점은 손에
+  든 채 들어와도 성공이라는 것이다. 사용자가 직원 쪽으로 내밀기만 해도
+  되게 관대하게 했다(Game Over 없음 원칙). 성공하면 손에서 놓게 하고
+  `receivePoint`(직원 쪽)로 옮겨 kinematic·Grab 비활성으로 고정한다.
+- **돌려받기(S8-2)**: 이씨 기록에 "여권 반환 방식은 김씨 Hand-over"로 협의
+  대기 중이었다. 문구가 "책상 위 여권을 다시 집으세요"이므로 `returnPoint`를
+  지정하면 `returnDelay`(기본 2초) 뒤 그 자리에 놓고 잡기를 허용한다.
+  사용자가 집으면 `onReturnTaken`을 보낸다. 성공 ID는
+  `zoneId + "_Returned"`(`HandOverZone.ReturnedSuffix`)다. `returnPoint`가
+  없으면 돌려주지 않는다(체크인처럼 건네기만 하는 경우).
+- **틀린 물건**: 손에 든 채든 놓았든 영역에 들어올 때마다 `onWrongObject`
+  1회만 보내고 성공 처리하지 않는다. 받는 물건과 함께 있으면 받는 물건이
+  우선이다. 힌트 연결은 HighlightController·Guide 작업 때 한다.
+- **Reset은 앞으로 복구한다**(중요): 처음엔 ResetZone이 항상 건네기 전으로
+  되돌렸다. 그러면 H2(돌려받기) Step에서 B를 눌렀을 때 Step은 H2인데 받을
+  물건이 없어 진행이 막힌다. ScenarioManager는 Step을 되감지 않으므로, 반환
+  대기 중이면 즉시 반환 상태로 앞당긴다(`HandOverZoneState.ResetForRecovery`).
+  건네기 전·돌려받은 뒤면 처음으로, 이미 반환됐으면 그대로 둔다.
+  ResetController가 물건을 원위치로 옮기므로, 반환된 물건은 원위치(그랩
+  테이블)에서 집어도 돌려받기 성공이다.
+- 상태 규칙은 `HandOverZoneState`(순수 C#)에, 물리 검출·고정·코루틴은
+  `HandOverZone`에 둔다. 검출은 PlacementZone과 같은 OverlapBox 방식이다.
+  이씨 `PlacementZoneState`는 의미(놓고 정지해야 성공)가 달라 재사용하지
+  않았다.
+
+### TestMap_Quest 변경
+
+- 그랩 존 오른쪽에 `TestHandOver`(Desk, Npc_TestStaff, Zone_TestHandOver,
+  ReceivePoint, ReturnPoint)를 추가했다. 이씨 임시 재질 M_TempStand·
+  M_TempUniformCheckIn·M_TempZone을 재사용했다(새 Material 없음).
+- Step 순서: T1(그랩 존 이동) → H1(큐브 건네기, 받는 물건 GrabCube) →
+  H2(돌려받기) → T2 → T3. 화살표는 H1에서 영역, H2에서 큐브를 가리킨다.
+
+### 검증
+
+- 실패 테스트(타입 없음, ResetForRecovery 없음)를 먼저 확인했다. EditMode 41개
+  통과(Hand-over 12개 새로 추가).
+- 시뮬레이터 Play(잡기·놓기는 XRInteractionManager SelectEnter/Cancel,
+  물건 위치는 코드로 이동):
+  - GrabSphere를 영역에 놓음 → WRONG 1회, H1 유지.
+  - GrabCube를 든 채 영역에 넣음 → 건네기 성공, 손에서 놓임, Grab 비활성,
+    H2 안내.
+  - 반환 전 잡기 시도 → 잡히지 않음.
+  - H2에서 B → Returned, 큐브는 테이블 원위치, Grab 가능. 집으면 T2로.
+  - T2·T3 → 완료 → B로 재시작 → T1 → 큐브를 내려놓아 건네기 → 2초 뒤
+    ReturnPoint에 반환 → 집으면 T2.
+  - 건넨 큐브가 ReceivePoint로 옮겨지는 것은 단일 배치로 따로 확인했다(첫
+    드라이버는 0.1초 동안 매 프레임 큐브를 다시 옮겨서 칸 위치에 남았던
+    테스트 오류).
+  - 콘솔 Error 0건.
+- **미검증**: Quest 실기기에서 실제 손으로 건네기·집기. 반환된 물건이 책상
+  위에서 굴러떨어지지 않는지는 실제 공항 책상에서 확인 필요.
+
+### 다음
+
+- Airport_Lee의 `Zone_HandOver_CheckIn`/`Zone_HandOver_Immigration`(이씨
+  임시 PlacementZone)을 HandOverZone으로 바꾸는 작업은 이씨 씬이다. 이씨에게
+  컴포넌트 사용법(receivePoint·returnPoint·성공 ID)을 공유하고 맡긴다.
+
 ## 2026-11-23 — ScenarioManager·ScenarioStep 구현, TestMap_Quest를 Step 기반으로 전환
 
 브랜치 `feature/kim-scenario-manager`. 체크리스트 남은 작업 중 §20 순서상
