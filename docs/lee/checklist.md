@@ -112,47 +112,75 @@ Unity에서 실제로 확인한 항목만 체크한다. 추측으로 체크하�
 
 ---
 
+# [21] 안내 음성·효과음 정리 - Checklist (담당 이씨, 김씨 시스템 연결)
+
+## Trello 완료 기준: 필요 음원 준비 및 재생
+- [x] 음성 서비스 결정: Azure Speech `ko-KR-InJoonNeural`, 유료 S0, AI 음성 고지(이씨 결정 11/13)
+- [x] 효과음 6개 합성 (`Tools/generate_sfx.py`), Unity Console Error 0개 (24kHz 모노, Vorbis, 11/13)
+- [x] 효과음 6개를 이씨가 직접 들어 확인 (11/23, 수정 없음)
+- [x] 음성 생성 스크립트 작성 (`Tools/generate_voice.py`), `--dry-run` 22줄 확인
+- [x] AI 음성 고지 문구 추가 (guide-texts.md C-AIVOICE, README 출처)
+- [x] Azure Speech S0 리소스 생성, 환경 변수 설정 (이씨, Azure for Students 구독, 11/23)
+- [x] 음성 22개 생성, 길이 0초 없음, Console Error·Warning 0개 (24kHz 모노, Vorbis, 합계 182.5초, 11/23)
+- [x] 이씨 프로젝트 Play 모드에서 재생 확인 (22개 로드, VO_START 재생 진행 확인, 11/23)
+- [x] 이씨가 직접 들어 발음·속도 확인 (11/23, 22개 모두 수정 없음)
+- [ ] feature/lee-audio → main 병합, GitHub Push
+- [ ] 김씨 연결: VO_<ID> → GuideManager.SetGuide, 효과음 재생 위치, 시작 화면 AI 음성 고지
+
+---
+
 # [이전] 팀 저장소 develop으로 옮기기 - Checklist (담당 이씨, 김씨 확인)
 
 ## 준비
 - [x] 두 저장소 기록이 이어져 있지 않음 확인 (개인 a6d4a9f, 팀 develop bcfb347)
 - [x] 팀 저장소 쓰기 권한 확인 (hlee971001-rgb, dry-run 11/20)
 - [x] 옮길 파일·옮기지 않을 파일·충돌 지점 정리 (plan.md)
-- [ ] 김씨 확인: 안 올린 작업 여부
-- [ ] 김씨 확인: FadeMoveController 참조 처리, Editor asmdef, 이씨 문서 위치, XR Device Simulator 샘플
+- [ ] 김씨 확인: 안 올린 작업 여부 — 팀 PR #1 설명에서 요청함(11/20)
+- [ ] 김씨 확인: FadeMoveController 참조 처리, Editor asmdef, 이씨 문서 위치, XR Device Simulator 샘플 — 팀 PR #1 리뷰에서 확인
+- [x] 김씨 확인이 필요한 것 중 씬이 쓰지 않는 Editor 도구·asmdef는 1차에서 빼고 진행하기로 결정 (이씨 11/20). 문서는 docs/lee/, 샘플은 넣기
 - [x] PR #1(feature/lee-audio → 개인 main) 처리 결정 — 열어 둔다(이씨 11/20). 원래 계획은 음성까지 만들고 들어 본 뒤 머지
 - [x] 1차(콘텐츠)·2차(음원)로 나눠 옮기기로 결정 (이씨 11/20, plan.md)
 
 아래 옮기기·검증·마무리는 1차(콘텐츠)다. 효과음·음성 생성 스크립트는 1차에 넣지 않는다.
 
 ## 옮기기
-- [ ] 팀 저장소 clone, develop에서 feature/lee-content 생성
-- [ ] 공항 모델 README대로 넣기 (Unity 열기 전)
-- [ ] 옮기는 파일 복사 (.meta 포함)
-- [ ] .gitignore에 공항 모델·LayoutCaptures 규칙 추가
-- [ ] Scripts/Editor에 GatePassVR.Editor asmdef 추가
-- [ ] FadeMoveController 참조를 팀 스크립트로 정리
+- [x] 팀 저장소 clone(C:\GatePass_VR), develop에서 feature/lee-content 생성
+- [x] 공항 모델 README대로 넣기 (Unity 열기 전)
+- [x] 옮기는 파일 복사 (.meta 포함)
+- [x] .gitignore에 공항 모델·LayoutCaptures 규칙 추가
+- [ ] Scripts/Editor에 GatePassVR.Editor asmdef 추가 — 1차에서 뺌, Editor 도구 7개와 같이 따로 PR
+- [x] FadeMoveController 참조를 팀 스크립트로 정리 (참조 1곳 GUID 교체)
+- [x] Airport_Lee Scene·라이트맵 GUID가 팀 SampleScene과 같아 Scene에 새 GUID, 라이트 다시 Bake
 
-## 검증
-- [ ] Compile Error 0개
-- [ ] Airport_Lee Missing Script·Prefab·Reference 0개
-- [ ] EditMode 테스트 전부 통과
-- [ ] Validate Colliders 경고 0개
-- [ ] Dest Tour 7개 지점 이동
-- [ ] 공항 모델 원본 미포함, 김씨 Scene·Prefab 변경 없음
+## 검증 (11/20, C:\GatePass_VR, Unity 6000.3.10f1)
+- [x] Compile Error 0개
+- [x] Airport_Lee Missing Script·Prefab 0개. Missing Reference 34개는 팀 VR 템플릿 프리팹에 원래 있던 것
+- [x] EditMode 테스트 전부 통과 (20/20)
+- [ ] Validate Colliders 경고 0개 — 미검증 (Editor 도구 필요)
+- [ ] Dest Tour 7개 지점 이동 — 미검증 (Editor 도구 필요)
+- [x] 공항 모델 원본 미포함, 김씨 Scene·Prefab 변경 없음
 
 ## 마무리
-- [ ] 의미 단위 커밋, 푸시, 팀 develop으로 PR (base가 develop인지 확인)
+- [x] 의미 단위 커밋 8개, 푸시, 팀 develop으로 PR (KJY-1204/GatePass_VR PR #1, base develop)
 - [ ] 김씨 리뷰 후 머지, 머지된 develop 다시 열어 재검증
+- [ ] Editor 도구 7개 + GatePassVR.Editor asmdef PR, Validate Colliders·Dest Tour 확인
 
-## 2차 (음원, 1차 머지 후)
-- [ ] 머지된 develop에서 feature/lee-audio 새로 만들기
-- [ ] 효과음 6개, Tools/generate_sfx.py·generate_voice.py, C-AIVOICE·README 음원 출처 복사 (.meta 포함)
-- [ ] 효과음 6개 이씨 청취 — 미검증
-- [ ] Azure Speech S0 리소스 생성, 환경 변수 설정 (이씨, 키는 커밋하지 않음)
-- [ ] 음성 22개 생성, 길이 0초 없음, Console Error 0개
-- [ ] Play 모드 재생 확인, 이씨가 발음·속도 확인 — 미검증
-- [ ] Compile Error 0개, EditMode 테스트 통과
+## 2차 (음원, 1차 머지 후) — 개인 먼저, 팀에 복사 (이씨 결정 11/23)
+- [x] 1차 팀 PR #1 develop 머지 확인 (a2938a7, 11/23)
+- [x] 2차 순서 결정: 개인 저장소에서 음성 생성·청취·푸시 후 팀 저장소에 복사 (이씨 11/23, plan.md)
+
+### 개인 저장소 (C:\GatePassVR_Lee, feature/lee-audio)
+- [x] Azure Speech S0 리소스 생성, 환경 변수 설정 (이씨, 키는 커밋하지 않음, 11/23)
+- [x] 음성 22개 생성, 길이 0초 없음, Console Error 0개 (11/23)
+- [x] Play 모드 재생 확인 (11/23)
+- [x] 효과음 6개 이씨 청취 (11/23, 수정 없음)
+- [x] 음성 22개 이씨 청취, 발음·속도 확인 (11/23, 수정 없음)
+- [x] 의미 단위 커밋, 개인 GitHub 푸시 (feature/lee-audio, 11/23)
+
+### 팀 저장소 (C:\GatePass_VR)
+- [x] 머지된 develop(a2938a7)에서 feature/lee-audio 새로 만들기 (11/23)
+- [x] 효과음 6개·음성 22개, Tools/generate_sfx.py·generate_voice.py, C-AIVOICE·README 음원 출처 복사 (.meta 포함, 11/23)
+- [x] Compile Error 0개, EditMode 테스트 통과(20/20), Airport_Lee Play 모드 재생 확인 (11/23)
 - [ ] 의미 단위 커밋, 푸시, 팀 develop으로 PR
 - [ ] 김씨 연결: VO_<ID> → GuideManager.SetGuide, 효과음 재생 위치, 시작 화면 AI 음성 고지
 - [ ] 머지된 develop 다시 열어 재검증
