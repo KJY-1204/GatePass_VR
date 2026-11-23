@@ -19,6 +19,8 @@ namespace GatePassVR.Core
 
         [Tooltip("Step에 들어갈 때마다(Reset 재진입 포함) 호출")]
         [SerializeField] private UnityEvent onStepEntered;
+        [Tooltip("Step에 들어갈 때 그 Step의 successId를 넘긴다(ScannerZone.AlignToScanId 등 차례 맞추기용)")]
+        [SerializeField] private UnityEvent<string> onStepEnteredId;
         [SerializeField] private UnityEvent onScenarioCompleted;
 
         private ScenarioProgress progress;
@@ -97,6 +99,15 @@ namespace GatePassVR.Core
             }
         }
 
+        // ScannerZone.onScanned에 Inspector로 연결한다. 방금 스캔한 물건의 scanId를 성공 ID로 쓴다.
+        public void ReportScanned(ScannerZone zone)
+        {
+            if (zone != null)
+            {
+                ReportSuccess(zone.LastScanId);
+            }
+        }
+
         // 현재 Step을 처음부터 다시 안내한다. 시나리오를 다 마친 뒤라면 첫 Step부터 다시 시작한다.
         public void ResetStep()
         {
@@ -137,6 +148,7 @@ namespace GatePassVR.Core
 
             SetGoal(step.goalTarget);
             onStepEntered?.Invoke();
+            onStepEnteredId?.Invoke(step.successId);
         }
 
         private void SetGoal(Transform target)

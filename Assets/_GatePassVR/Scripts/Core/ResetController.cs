@@ -14,6 +14,7 @@ namespace GatePassVR.Core
         [SerializeField] private XRGrabInteractable[] items = new XRGrabInteractable[0];
         [SerializeField] private PlacementZone[] zones = new PlacementZone[0];
         [SerializeField] private HandOverZone[] handOverZones = new HandOverZone[0];
+        [SerializeField] private ScannerZone[] scannerZones = new ScannerZone[0];
         [Tooltip("Reset 입력. 기본값은 양손 컨트롤러 secondaryButton(오른손 B, 왼손 Y)")]
         [SerializeField] private InputAction resetAction = CreateDefaultResetAction();
 
@@ -57,6 +58,14 @@ namespace GatePassVR.Core
             }
 
             foreach (var zone in handOverZones)
+            {
+                if (zone != null)
+                {
+                    zone.ResetZone();
+                }
+            }
+
+            foreach (var zone in scannerZones)
             {
                 if (zone != null)
                 {
