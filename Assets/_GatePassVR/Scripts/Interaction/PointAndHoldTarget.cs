@@ -53,9 +53,11 @@ namespace GatePassVR.Interaction
         }
 
         // 이 Step을 다시 시도할 수 있도록 게이지를 초기 상태로 되돌린다.
+        // Ray가 계속 가리키는 중이면 hover 이벤트가 다시 오지 않으므로 현재 hover 상태를 다시 맞춘다.
         public void ResetHold()
         {
             gauge.Reset();
+            gauge.SetHovering(interactable.isHovered);
             onProgressChanged?.Invoke(gauge.Progress);
         }
 
