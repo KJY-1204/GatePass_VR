@@ -126,3 +126,18 @@ TestMap_Quest Pad에 직접 연결된 MoveTo·SetMainText·SetGoal을 Step 데�
 2. TestMap_Quest에서 탑승권(구)을 먼저 대면 진행되지 않고, 여권(큐브) → 탑승권(구) 순서로 Step이 진행된다 → 시뮬레이터 Play.
 3. 여권 스캔 뒤 B Reset해도 탑승권 Step에서 계속 진행할 수 있다 → Play.
 4. Compile Error 0, EditMode 전체 통과.
+
+## 현재 작업 (2026-11-23) — HighlightController
+
+§13-9(약 5초간 진행이 없으면 목표를 더 명확히 Highlight)와 §16.1을 구현한다.
+
+동작:
+- ScenarioManager가 Step 진입 때 화살표와 함께 `HighlightController.SetTarget(goalTarget)`을 부른다.
+- 목표의 Renderer들을 은은하게 깜빡이게(Normal) 한다. `GuideManager.onNoProgressShort`(5초 무반응) →
+  `Escalate()`로 더 밝고 빠르게(Strong). 목표가 바뀌거나 없어지면 원래 색으로 되돌리고 Normal로.
+- Material 복제 없이 MaterialPropertyBlock으로 `_BaseColor`(없으면 `_Color`)만 바꾼다. 원래 블록 값이 있으면 그 값으로 되돌린다.
+
+완료 기준:
+1. 목표 없음 → 강조 0, Escalate 무시. 새 목표 → Normal. Strong 진폭·속도가 Normal보다 크다 → EditMode 테스트.
+2. TestMap_Quest Play: 시작 Pad가 깜빡이고, 5초 무반응 뒤 Strong, Step 진행 시 이전 목표 색이 원래대로, 새 목표 강조.
+3. 완료 시 강조가 사라진다. Compile Error 0, EditMode 전체 통과.
