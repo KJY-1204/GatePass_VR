@@ -141,3 +141,24 @@ TestMap_Quest Pad에 직접 연결된 MoveTo·SetMainText·SetGoal을 Step 데�
 1. 목표 없음 → 강조 0, Escalate 무시. 새 목표 → Normal. Strong 진폭·속도가 Normal보다 크다 → EditMode 테스트.
 2. TestMap_Quest Play: 시작 Pad가 깜빡이고, 5초 무반응 뒤 Strong, Step 진행 시 이전 목표 색이 원래대로, 새 목표 강조.
 3. 완료 시 강조가 사라진다. Compile Error 0, EditMode 전체 통과.
+
+## 현재 작업 (2026-11-23) — 공통 기능 Prefab, Point & Hold Progress UI Prefab
+
+이씨가 Airport_Lee에 코드 복사 없이 Inspector 설정만으로 붙일 수 있게 지금까지 만든 기능을 Prefab으로 묶는다(§16.3, §25).
+외부 에셋 Prefab은 수정하지 않는다. 씬마다 다른 참조(GuideManager, 화살표, XR Origin, 받는 물건)는 씬에서 지정한다.
+
+만들 Prefab (`Assets/_GatePassVR/Prefabs/`):
+- `UI/PointHoldGauge` — 월드 Canvas 도넛 게이지(`RadialGaugeVisual`). (Point & Hold Progress UI Prefab)
+- `Interaction/PointHoldPad` — 루트에 XRSimpleInteractable + PointAndHoldTarget, 자식 PadMesh(Collider) + PointHoldGauge.
+  onProgressChanged → 게이지 연결이 Prefab 안에 들어 있다. targetId·onHoldCompleted는 씬에서.
+- `Interaction/HandOverZone` — 초록 판 + HandOverZone + ReceivePoint·ReturnPoint 자식. 받는 물건·성공 연결은 씬에서.
+- `Interaction/ScannerZone` — 초록 판 + ScannerZone + AudioSource(SFX_Scan·SFX_Retry 연결). 순서·성공 연결은 씬에서.
+- `Core/GatePassSystems` — ScenarioManager + HighlightController + ResetController + FadeMoveController + FadeCanvas.
+  내부 연결(onStepEntered→RearmHoldTargets, onReset→ResetStep, onMoveCompleted→RearmHoldTargets, Fade CanvasGroup, highlight)은 Prefab 안에.
+  GuideManager·화살표·XR Origin·Step 목록·등록 대상은 씬에서.
+
+완료 기준:
+1. TestMap_Quest의 Pad 3개·게이지·Hand-over·Scanner·시스템 오브젝트를 Prefab 인스턴스로 바꿔도 위치·문구·순서가 같다.
+2. 바꾼 뒤 Missing Script/Reference 0, Compile Error 0, EditMode 전체 통과.
+3. 시뮬레이터 Play로 T1 Pad 이동(게이지 표시) → H1·H2 → S1·S2 → T2 → T3 → 완료가 기존과 같이 진행된다.
+4. 이씨용 사용법(씬에서 채울 항목)을 context-notes에 남긴다.
