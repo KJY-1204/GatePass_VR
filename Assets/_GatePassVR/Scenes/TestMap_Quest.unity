@@ -287,37 +287,13 @@ MonoBehaviour:
   onHoldCompleted:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 2129193760}
-        m_TargetAssemblyTypeName: GatePassVR.VR.FadeMoveController, GatePassVR.Runtime
-        m_MethodName: MoveTo
-        m_Mode: 2
-        m_Arguments:
-          m_ObjectArgument: {fileID: 1382665773}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Transform, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-      - m_Target: {fileID: 1507939090}
-        m_TargetAssemblyTypeName: GatePassVR.Guidance.GuideManager, GatePassVR.Runtime
-        m_MethodName: SetMainText
-        m_Mode: 5
+      - m_Target: {fileID: 1475293465}
+        m_TargetAssemblyTypeName: GatePassVR.Core.ScenarioManager, GatePassVR.Runtime
+        m_MethodName: ReportHoldCompleted
+        m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: 
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: "\uC624\uD508 \uC5D0\uC5B4\uB9AC\uC5B4\uB85C \uC774\uB3D9\uD558\uC138\uC694"
-          m_BoolArgument: 0
-        m_CallState: 2
-      - m_Target: {fileID: 6730990648749548012}
-        m_TargetAssemblyTypeName: GatePassVR.Guidance.GoalIndicatorArrow, GatePassVR.Runtime
-        m_MethodName: SetGoal
-        m_Mode: 2
-        m_Arguments:
-          m_ObjectArgument: {fileID: 1082393297}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Transform, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
@@ -1064,37 +1040,13 @@ MonoBehaviour:
   onHoldCompleted:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 2129193760}
-        m_TargetAssemblyTypeName: GatePassVR.VR.FadeMoveController, GatePassVR.Runtime
-        m_MethodName: MoveTo
-        m_Mode: 2
-        m_Arguments:
-          m_ObjectArgument: {fileID: 621657401}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Transform, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-      - m_Target: {fileID: 1507939090}
-        m_TargetAssemblyTypeName: GatePassVR.Guidance.GuideManager, GatePassVR.Runtime
-        m_MethodName: SetMainText
-        m_Mode: 5
+      - m_Target: {fileID: 1475293465}
+        m_TargetAssemblyTypeName: GatePassVR.Core.ScenarioManager, GatePassVR.Runtime
+        m_MethodName: ReportHoldCompleted
+        m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: 
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: "\uC2DC\uC791 \uC9C0\uC810\uC73C\uB85C \uB3CC\uC544\uAC00\uC138\uC694"
-          m_BoolArgument: 0
-        m_CallState: 2
-      - m_Target: {fileID: 6730990648749548012}
-        m_TargetAssemblyTypeName: GatePassVR.Guidance.GoalIndicatorArrow, GatePassVR.Runtime
-        m_MethodName: SetGoal
-        m_Mode: 2
-        m_Arguments:
-          m_ObjectArgument: {fileID: 2020736072}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Transform, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
@@ -1798,6 +1750,95 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1475293464
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1475293466}
+  - component: {fileID: 1475293465}
+  m_Layer: 0
+  m_Name: ScenarioManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1475293465
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1475293464}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 093c4a9e4d87cad4aa01e826907f3f7c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: GatePassVR.Runtime::GatePassVR.Core.ScenarioManager
+  steps:
+  - stepId: T1
+    successId: Pad_ToGrabZone
+    guideMain: "\uADF8\uB7A9 \uC874\uC73C\uB85C \uC774\uB3D9\uD558\uC138\uC694"
+    guideHint: 
+    guideVoice: {fileID: 0}
+    goalTarget: {fileID: 239623914}
+    moveDestination: {fileID: 1382665773}
+  - stepId: T2
+    successId: Pad_ToOpenArea
+    guideMain: "\uC624\uD508 \uC5D0\uC5B4\uB9AC\uC5B4\uB85C \uC774\uB3D9\uD558\uC138\uC694"
+    guideHint: 
+    guideVoice: {fileID: 0}
+    goalTarget: {fileID: 1082393297}
+    moveDestination: {fileID: 621657401}
+  - stepId: T3
+    successId: Pad_BackToStart
+    guideMain: "\uC2DC\uC791 \uC9C0\uC810\uC73C\uB85C \uB3CC\uC544\uAC00\uC138\uC694"
+    guideHint: 
+    guideVoice: {fileID: 0}
+    goalTarget: {fileID: 2020736072}
+    moveDestination: {fileID: 840631546}
+  guideManager: {fileID: 1507939090}
+  goalArrow: {fileID: 6730990648749548012}
+  fadeMove: {fileID: 2129193760}
+  completedGuideText: "\uD14C\uC2A4\uD2B8 \uC644\uB8CC! B/Y \uBC84\uD2BC\uC73C\uB85C
+    \uB2E4\uC2DC \uC2DC\uC791\uD558\uC138\uC694"
+  onStepEntered:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 2029700661}
+        m_TargetAssemblyTypeName: GatePassVR.Core.ResetController, GatePassVR.Runtime
+        m_MethodName: RearmHoldTargets
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  onScenarioCompleted:
+    m_PersistentCalls:
+      m_Calls: []
+--- !u!4 &1475293466
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1475293464}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1507939090 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 2699592655169413057, guid: ab15751b7ec3b6744a2dfcf28fb4d8ee, type: 3}
@@ -2360,37 +2401,13 @@ MonoBehaviour:
   onHoldCompleted:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 2129193760}
-        m_TargetAssemblyTypeName: GatePassVR.VR.FadeMoveController, GatePassVR.Runtime
-        m_MethodName: MoveTo
-        m_Mode: 2
-        m_Arguments:
-          m_ObjectArgument: {fileID: 840631546}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Transform, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-      - m_Target: {fileID: 1507939090}
-        m_TargetAssemblyTypeName: GatePassVR.Guidance.GuideManager, GatePassVR.Runtime
-        m_MethodName: SetMainText
-        m_Mode: 5
+      - m_Target: {fileID: 1475293465}
+        m_TargetAssemblyTypeName: GatePassVR.Core.ScenarioManager, GatePassVR.Runtime
+        m_MethodName: ReportHoldCompleted
+        m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: 
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: "\uADF8\uB7A9 \uC874\uC73C\uB85C \uC774\uB3D9\uD558\uC138\uC694"
-          m_BoolArgument: 0
-        m_CallState: 2
-      - m_Target: {fileID: 6730990648749548012}
-        m_TargetAssemblyTypeName: GatePassVR.Guidance.GoalIndicatorArrow, GatePassVR.Runtime
-        m_MethodName: SetGoal
-        m_Mode: 2
-        m_Arguments:
-          m_ObjectArgument: {fileID: 239623914}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Transform, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
@@ -2629,7 +2646,19 @@ MonoBehaviour:
     m_Flags: 0
   onReset:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1475293465}
+        m_TargetAssemblyTypeName: GatePassVR.Core.ScenarioManager, GatePassVR.Runtime
+        m_MethodName: ResetStep
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!4 &2029700662
 Transform:
   m_ObjectHideFlags: 0
@@ -2996,3 +3025,4 @@ SceneRoots:
   - {fileID: 1281926663}
   - {fileID: 6730990648749548011}
   - {fileID: 2029700662}
+  - {fileID: 1475293466}
