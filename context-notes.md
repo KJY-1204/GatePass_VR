@@ -2,6 +2,38 @@
 
 결정 사항과 이유를 시간순으로 누적 기록한다. 완료된 내용을 삭제하지 않는다.
 
+## 2026-11-23 — 김씨·이씨 작업 통합 점검 (추가 병합할 것 없음)
+
+- 이씨 작업은 PR #1(feature/lee-content, 11/20)과 PR #2(feature/lee-audio,
+  11/23)로 이미 develop에 병합되어 있다. 원격에 develop에 안 들어간
+  브랜치는 없다.
+- 이씨 개인 저장소(hlee971001-rgb/GatePassVR_Lee, 공개)와 팀 저장소는 git
+  이력이 연결되지 않은 복사 이전 방식이다. 파일 단위로 비교했다.
+  - develop에 없는 것은 Editor 도구 7개(`Scripts/Editor/Airport*`,
+    `DestTourWindow`, `DestViewCapture`, `SignViewRules`)뿐이다. 이씨
+    체크리스트에 "1차에서 뺌, GatePassVR.Editor asmdef와 따로 PR"로 적힌
+    이씨 담당 작업이라 이번에 가져오지 않았다.
+  - `Airport_Lee.unity` 내용이 다른 것은 이전할 때 새 GUID와 팀
+    FadeMoveController 참조로 바꾼 결과다. 개인 저장소의 마지막 씬 수정은
+    11/13로 이전(11/20)보다 앞선다.
+- 이씨 병합(bcfb347→4bcb859)은 파일 추가만 했고 김씨 스크립트·Prefab·
+  씬·Packages·ProjectSettings를 수정하지 않았다. ResetController 작업도
+  이씨 파일을 수정하지 않았다.
+- 검사 결과: Compile Error 0, EditMode 22개 통과. `_GatePassVR` 씬 3개와
+  Prefab 전체에서 Missing Script·Missing Prefab 0개다.
+- Missing Reference는 Airport_Lee 34개, TestMap_Quest 8개다. 전부
+  VRTemplateAssets UI·Affordance Callouts·XRI 샘플 UI Prefab 안의 Image
+  Sprite/Material, AudioSource 참조다. 가리키는 GUID 17개가 저장소 이력
+  어디에도 .meta로 존재한 적이 없다. 템플릿이 처음부터 해당 에셋 없이
+  들어온 것이고 이번 통합과는 무관하다. 프로젝트 UI는 이 Prefab들을 쓰지
+  않으니 필요할 때 정리한다.
+- 통합 동작 확인: Airport_Lee Play 중에만 ResetController를 붙여(씬 저장
+  안 함) Zone_BaggageDrop_CheckIn + Obj_Carrier_CheckIn을 등록했다.
+  PLACED 상태에서 `ResetCurrent()`를 부르자 Zone 해제, 캐리어 원위치,
+  kinematic 해제, Grab 활성이 되었고 1초 뒤에도 다시 PLACED되지 않았다.
+  아래 ResetController 항목의 "PlacementZone 해제 경로 미검증"이 이것으로
+  해소되었다.
+
 ## 2026-11-23 — ResetController 추가, Point & Hold 재사용 버그 2건 수정
 
 브랜치 `feature/kim-reset-controller`. 아래 "검증 결과" 항목의 버그 3건을
