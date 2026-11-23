@@ -13,6 +13,7 @@ namespace GatePassVR.Core
         [SerializeField] private List<ScenarioStep> steps = new List<ScenarioStep>();
         [SerializeField] private GuideManager guideManager;
         [SerializeField] private GoalIndicatorArrow goalArrow;
+        [SerializeField] private HighlightController highlight;
         [SerializeField] private FadeMoveController fadeMove;
         [Tooltip("모든 Step을 마쳤을 때 표시할 안내")]
         [SerializeField] private string completedGuideText;
@@ -156,6 +157,11 @@ namespace GatePassVR.Core
             if (goalArrow != null)
             {
                 goalArrow.SetGoal(target);
+            }
+
+            if (highlight != null)
+            {
+                highlight.SetTarget(target);
             }
         }
     }
