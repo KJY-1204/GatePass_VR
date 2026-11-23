@@ -2,6 +2,61 @@
 
 결정 사항과 이유를 시간순으로 누적 기록한다. 완료된 내용을 삭제하지 않는다.
 
+## 2026-11-23 — ScenarioManager·ScenarioStep 구현, TestMap_Quest를 Step 기반으로 전환
+
+브랜치 `feature/kim-scenario-manager`. 체크리스트 남은 작업 중 §20 순서상
+맨 앞이고 Hand-over·Scanner·Highlight·START→EXIT 연결의 선행 작업이라
+먼저 했다.
+
+### 결정과 이유
+
+- **상태와 MonoBehaviour 분리**: 진행 규칙(현재 ID만 1회 진행, 끝, 재시작)은
+  `ScenarioProgress`에만 두고 EditMode로 테스트한다. `ScenarioManager`는
+  안내·화살표·이동·이벤트 호출만 한다(§22.1).
+- **성공 진입점**: `ReportSuccess(string)` 하나로 판단한다. Inspector 연결을
+  위해 `ReportHoldCompleted(PointAndHoldTarget)`와 `ReportPlaced(PlacementZone)`를
+  두어 각각 `targetId`, `zoneId`를 넘긴다. Hand-over·Scanner도 같은 패턴으로
+  붙이면 된다.
+- **이동은 Step 데이터로**: Pad가 직접 `MoveTo`를 부르지 않는다. 성공한
+  Step의 `moveDestination`으로 ScenarioManager가 Fade 이동한다. 그래서
+  틀린 Pad를 Hold해도 이동하지 않는다.
+- **안내 갱신 시점**: 성공 즉시 다음 Step 안내로 바꾼다(기존 하드와이어와
+  같은 시점). 도착 후로 미루는 것은 실기기에서 어색하면 바꾼다.
+- **Pad 재활성화**: `onStepEntered → ResetController.RearmHoldTargets`를
+  추가했다. 기존 `FadeMoveController.onMoveCompleted → RearmHoldTargets`도
+  남겼다. Step 진입 시점은 Fade 중이라 직전 Pad를 계속 가리키면 다시 찰
+  수 있는데, 도착 후 한 번 더 풀어서 막힘이 없다. Play에서 처음에 잘못
+  Hold한 Pad_BackToStart도 3단계에서 정상 동작했다.
+- **Reset 연결**: `ResetController.onReset → ScenarioManager.ResetStep`. 진행
+  중이면 현재 Step 안내·화살표를 다시 보여주고, 완료 후면 첫 Step부터
+  다시 시작한다. TestMap_Quest는 마지막 Step이 시작 지점으로 돌아오므로
+  재시작해도 위치가 맞는다. 실제 공항 시나리오에서 완료 후 재시작이
+  필요한지는 그때 정한다.
+- 완료 문구: "테스트 완료! B/Y 버튼으로 다시 시작하세요"(TestMap_Quest 전용
+  Inspector 값). 완료 시 화살표는 숨긴다.
+
+### 주의
+
+- Fade 이동 중에 다음 Step이 성공하면 `FadeMoveController.MoveTo`가 무시되어
+  Step은 넘어가도 이동은 안 된다. 지금 Pad 흐름에선 다음 Pad가 멀어서
+  생기지 않지만, 이동 없는 Step(Placement 등)이 이동 Step 바로 뒤에 오면
+  확인할 것.
+- `GuideManager.initialMainText`와 `GoalIndicatorArrow.initialGoal`은 그대로
+  두었다. ScenarioManager.Start가 바로 덮어쓰므로 동작에는 영향이 없다.
+- 이씨 `docs/lee/guide-texts.md`의 ID(S1-0 등)를 `stepId`로 쓰고 `VO_<ID>`
+  클립을 `guideVoice`에 넣으면 이씨 음원이 그대로 연결된다(Airport_Lee에
+  붙일 때).
+
+### 검증
+
+- 컴파일 실패(ScenarioProgress 없음)를 먼저 확인한 뒤 구현했다. EditMode
+  29개 통과(새 7개).
+- TestMap_Quest 시뮬레이터 Play: 시작 안내·화살표 → 틀린 Pad 4초 Hold 시
+  이동 없음 → 3단계 이동, 안내·화살표 갱신 → 완료 문구, 화살표 숨김 →
+  완료 후 Hold 무시 → B 버튼으로 첫 Step 안내 복귀 → 다시 1단계 이동.
+  콘솔 Error 0건.
+- 미검증: Quest 실기기.
+
 ## 2026-11-23 — 김씨·이씨 작업 통합 점검 (추가 병합할 것 없음)
 
 - 이씨 작업은 PR #1(feature/lee-content, 11/20)과 PR #2(feature/lee-audio,
