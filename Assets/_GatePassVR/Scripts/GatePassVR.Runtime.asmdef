@@ -3,7 +3,8 @@
     "rootNamespace": "GatePassVR",
     "references": [
         "Unity.XR.Interaction.Toolkit",
-        "Unity.TextMeshPro"
+        "Unity.TextMeshPro",
+        "Unity.InputSystem"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
