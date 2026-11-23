@@ -2364,6 +2364,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1475293466}
   - component: {fileID: 1475293465}
+  - component: {fileID: 1475293467}
   m_Layer: 0
   m_Name: ScenarioManager
   m_TagString: Untagged
@@ -2436,6 +2437,7 @@ MonoBehaviour:
     moveDestination: {fileID: 840631546}
   guideManager: {fileID: 1507939090}
   goalArrow: {fileID: 6730990648749548012}
+  highlight: {fileID: 1475293467}
   fadeMove: {fileID: 2129193760}
   completedGuideText: "\uD14C\uC2A4\uD2B8 \uC644\uB8CC! B/Y \uBC84\uD2BC\uC73C\uB85C
     \uB2E4\uC2DC \uC2DC\uC791\uD558\uC138\uC694"
@@ -2487,6 +2489,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1475293467
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1475293464}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c8aad6b654a3aa445bae3c28d2f4c2be, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: GatePassVR.Runtime::GatePassVR.Guidance.HighlightController
+  highlightColor: {r: 1, g: 0.85, b: 0.2, a: 1}
 --- !u!114 &1507939090 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 2699592655169413057, guid: ab15751b7ec3b6744a2dfcf28fb4d8ee, type: 3}
@@ -3937,6 +3952,30 @@ PrefabInstance:
     - target: {fileID: 2699592655169413057, guid: ab15751b7ec3b6744a2dfcf28fb4d8ee, type: 3}
       propertyPath: initialMainText
       value: "\uADF8\uB7A9 \uC874\uC73C\uB85C \uC774\uB3D9\uD558\uC138\uC694"
+      objectReference: {fileID: 0}
+    - target: {fileID: 2699592655169413057, guid: ab15751b7ec3b6744a2dfcf28fb4d8ee, type: 3}
+      propertyPath: onNoProgressShort.m_PersistentCalls.m_Calls.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2699592655169413057, guid: ab15751b7ec3b6744a2dfcf28fb4d8ee, type: 3}
+      propertyPath: onNoProgressShort.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2699592655169413057, guid: ab15751b7ec3b6744a2dfcf28fb4d8ee, type: 3}
+      propertyPath: onNoProgressShort.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 1475293467}
+    - target: {fileID: 2699592655169413057, guid: ab15751b7ec3b6744a2dfcf28fb4d8ee, type: 3}
+      propertyPath: onNoProgressShort.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2699592655169413057, guid: ab15751b7ec3b6744a2dfcf28fb4d8ee, type: 3}
+      propertyPath: onNoProgressShort.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: Escalate
+      objectReference: {fileID: 0}
+    - target: {fileID: 2699592655169413057, guid: ab15751b7ec3b6744a2dfcf28fb4d8ee, type: 3}
+      propertyPath: onNoProgressShort.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: GatePassVR.Guidance.HighlightController, GatePassVR.Runtime
       objectReference: {fileID: 0}
     - target: {fileID: 3779105033350269616, guid: ab15751b7ec3b6744a2dfcf28fb4d8ee, type: 3}
       propertyPath: initialGoal
