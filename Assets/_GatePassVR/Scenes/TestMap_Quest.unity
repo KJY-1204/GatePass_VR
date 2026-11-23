@@ -2565,6 +2565,86 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2029700660
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2029700662}
+  - component: {fileID: 2029700661}
+  m_Layer: 0
+  m_Name: ResetController
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &2029700661
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2029700660}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a4ad412d454546946933652f85a3ec18, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: GatePassVR.Runtime::GatePassVR.Core.ResetController
+  holdTargets:
+  - {fileID: 239623909}
+  - {fileID: 1082393292}
+  - {fileID: 2020736067}
+  items:
+  - {fileID: 1139916416}
+  - {fileID: 1542222906}
+  zones: []
+  resetAction:
+    m_Name: Reset
+    m_Type: 1
+    m_ExpectedControlType: 
+    m_Id: bf82309b-e6c4-4ab0-94db-304955ad5f11
+    m_Processors: 
+    m_Interactions: 
+    m_SingletonActionBindings:
+    - m_Name: 
+      m_Id: b88029ff-f18e-4823-a191-cea0665bf1c2
+      m_Path: <XRController>{LeftHand}/secondaryButton
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Reset
+      m_Flags: 0
+    - m_Name: 
+      m_Id: 7b3fd0e9-f969-44f3-a427-3a2f48176bf4
+      m_Path: <XRController>{RightHand}/secondaryButton
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Reset
+      m_Flags: 0
+    m_Flags: 0
+  onReset:
+    m_PersistentCalls:
+      m_Calls: []
+--- !u!4 &2029700662
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2029700660}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2040497070
 GameObject:
   m_ObjectHideFlags: 0
@@ -2784,7 +2864,19 @@ MonoBehaviour:
   fadeInDuration: 0.3
   onMoveCompleted:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 2029700661}
+        m_TargetAssemblyTypeName: GatePassVR.Core.ResetController, GatePassVR.Runtime
+        m_MethodName: RearmHoldTargets
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!4 &2129193761
 Transform:
   m_ObjectHideFlags: 0
@@ -2903,3 +2995,4 @@ SceneRoots:
   - {fileID: 1893503064}
   - {fileID: 1281926663}
   - {fileID: 6730990648749548011}
+  - {fileID: 2029700662}
