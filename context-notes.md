@@ -2,6 +2,60 @@
 
 결정 사항과 이유를 시간순으로 누적 기록한다. 완료된 내용을 삭제하지 않는다.
 
+## 2026-11-23 — HighlightController 구현
+
+브랜치 `feature/kim-highlight`. §13-9(약 5초 무반응 시 목표를 더 명확히
+강조)와 §16.1을 구현했다.
+
+### 결정과 이유
+
+- **목표는 ScenarioManager가 준다**: 화살표와 같은 `goalTarget`을
+  `HighlightController.SetTarget`에 넘긴다. 강조 대상을 따로 설정하지 않아도
+  Step 데이터 하나로 문구·화살표·강조가 맞춰진다.
+- **강조 방식**: 목표와 자식 Renderer의 `_BaseColor`(없으면 `_Color`)를
+  노란색 쪽으로 깜빡인다. Normal은 세기 0.35·1Hz, Strong은 0.8·2.5Hz다.
+  투명 판(Zone)의 알파는 유지한다. Outline 셰이더나 Material 복제는 쓰지
+  않는다(§24, 추가 에셋 없음). 실기기에서 눈에 덜 띄면 색·세기를 조정한다.
+- **5초 강화**: GuideManager가 이미 가진 `onNoProgressShort`에 `Escalate`를
+  연결했다. GuideManager 타이머는 `SetGuide`(Step 전환)마다 초기화되고,
+  Highlight도 새 목표에서 Normal로 돌아간다. 10초 재안내 음성은
+  GuideManager가 이미 처리한다.
+- **다른 컴포넌트 색 보존**(중요): 이씨 PlacementZone은 성공하면
+  PropertyBlock으로 초록색을 칠한다. 그 직후 같은 프레임에 Step이 넘어가
+  Highlight가 "원래 색"을 되돌리면 성공 색이 지워진다. 그래서 마지막으로
+  쓴 색(또는 처음 읽은 색)과 현재 색이 다르면 외부 변경으로 보고 새 기준
+  색으로 삼는다. 처음에는 첫 강조를 쓰기 전의 외부 변경을 놓쳤다. Play에서
+  발견해 처음 읽은 색도 기록하게 고쳤다.
+- 상태 규칙(Off/Normal/Strong, 세기 계산)은 `HighlightState`에 두고
+  EditMode로 테스트한다. Renderer 처리는 MonoBehaviour에 둔다.
+
+### TestMap_Quest 변경
+
+- ScenarioManager 오브젝트에 HighlightController를 추가하고
+  `ScenarioManager.highlight`에 연결했다.
+- `GuideHUD`(Prefab 인스턴스)의 `onNoProgressShort → Escalate`는 씬
+  오버라이드로만 넣었다. 공용 Prefab은 수정하지 않았다.
+
+### 검증
+
+- 실패 테스트(타입 없음)를 먼저 확인했다. EditMode 56개 통과.
+- Play:
+  - 시작 Pad_ToGrabZone이 강조된다(색 변화 0~0.40).
+  - 무반응 4.98초에 Strong이 되었다(변화 폭 0~0.92).
+  - Step 진행 시 이전 Pad가 원래 색(0.5 회색)으로 돌아오고 새 목표는 Normal이다.
+  - 강조 중인 Zone에 외부에서 초록색을 칠하면 그 색을 기준으로 깜빡이고,
+    목표가 바뀌어도 초록색이 남는다.
+  - 완료 후 강조가 Off가 되고 거친 목표들이 모두 원래 색이다. 콘솔 Error 0건.
+  - Step 전환은 `ScenarioManager.ReportSuccess` 직접 호출로 했다. 실제
+    상호작용 경로는 이전 작업에서 검증했다.
+- **미검증**: Quest 실기기에서 깜빡임이 충분히 눈에 띄는지, 어지럽지 않은지.
+
+### 다음
+
+- 틀린 물건 힌트: Hand-over·Scanner·PlacementZone의 `onWrongObject`/
+  `onWrongItem`을 GuideManager 힌트("먼저 여권을 대 주세요" 등)로 연결하는
+  작업이 남았다. 문구는 이씨 guide-texts.md에 있다.
+
 ## 2026-11-23 — Scanner (`ScannerZone`) 구현
 
 브랜치 `feature/kim-scanner`. 체크리스트 Phase B 다음 항목이다.
