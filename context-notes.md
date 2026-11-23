@@ -2,6 +2,51 @@
 
 결정 사항과 이유를 시간순으로 누적 기록한다. 완료된 내용을 삭제하지 않는다.
 
+## 2026-11-23 — 공통 기능 Prefab, Point & Hold Progress UI Prefab
+
+브랜치 `feature/kim-common-prefabs`. 이씨가 Airport_Lee에 코드 복사 없이
+Inspector 설정만으로 붙일 수 있게 지금까지 만든 기능을 Prefab으로 묶었다.
+
+### 만든 Prefab (`Assets/_GatePassVR/Prefabs/`)
+
+| Prefab | 들어 있는 것과 내부 연결 | 씬에서 채울 것 |
+|---|---|---|
+| `Core/GatePassSystems` | ScenarioManager + HighlightController, ResetController, FadeController(FadeMoveController), FadeCanvas. 연결: `highlight`, `fadeMove`, Fade CanvasGroup, `onStepEntered→RearmHoldTargets`, `onReset→ResetStep`, `onMoveCompleted→RearmHoldTargets`, Reset 입력 B/Y | ScenarioManager: `guideManager`(GuideHUD), `goalArrow`(GuideHUD/Canvas/GoalArrow), `steps`, `completedGuideText`, 필요하면 `onStepEnteredId→ScannerZone.AlignToScanId`. FadeController: `originToMove`(XR Origin). ResetController: `holdTargets`·`items`·`zones`·`handOverZones`·`scannerZones` 등록. GuideHUD `onNoProgressShort→HighlightController.Escalate` |
+| `Interaction/PointHoldPad` | 루트: XRSimpleInteractable + PointAndHoldTarget(hold 1.2초, decay 2). 자식: PadMesh(원기둥+CapsuleCollider), PointHoldGauge(`onProgressChanged→SetProgress`) | `targetId`(= Step successId), `onHoldCompleted→ScenarioManager.ReportHoldCompleted` |
+| `UI/PointHoldGauge` | 월드 Canvas 도넛 게이지(`RadialGaugeVisual`) | 보통 PointHoldPad 안에서 쓴다 |
+| `Interaction/HandOverZone` | 루트: BoxCollider(트리거, 0.3×0.02×0.25) + HandOverZone. 자식: Plate(M_TempZone), ReceivePoint, ReturnPoint(연결됨) | `zoneId`, `acceptedItems`(여권), 위치, ReceivePoint·ReturnPoint 위치(체크인처럼 돌려주지 않으면 `returnPoint` 비우기), `onHandedOver→ReportHandedOver`, `onReturnTaken→ReportReturnTaken` |
+| `Interaction/ScannerZone` | 루트: BoxCollider(트리거) + ScannerZone + AudioSource(`onScanned→PlayOneShot(SFX_Scan)`, `onWrongItem→PlayOneShot(SFX_Retry)`). 자식: Plate | `sequence`(여권 S4-1 → 탑승권 S4-2 권장), `onScanned→ScenarioManager.ReportScanned` 추가 |
+
+- 루트를 크기 1로 두고 보이는 판(Plate)만 자식으로 줄였다. 크기를 줄인
+  판에 ReceivePoint 같은 자식을 달면 위치·크기 계산이 꼬이기 때문이다.
+  Highlight는 루트를 목표로 받아 자식 Renderer를 칠한다.
+- PointHoldPad도 같은 이유로 루트는 크기 1이고, PadMesh만 0.8×0.05×0.8이다.
+  XRSimpleInteractable은 시작할 때 자식 콜라이더를 자동으로 모은다(Play에서
+  Ray가 맞는 것 확인).
+- 씬 오브젝트(GuideHUD, XR Origin, 물건)를 가리키는 참조는 Prefab에 넣을 수
+  없어서 씬에서 채운다. 위 표의 오른쪽 칸이 그 목록이다.
+
+### TestMap_Quest 교체 방법과 주의
+
+- 옛 오브젝트의 컴포넌트 값을 새 인스턴스로 `EditorUtility.CopySerialized`하고,
+  씬 전체에서 옛 오브젝트·컴포넌트를 가리키는 참조 37개를 새 것으로 바꾼 뒤
+  옛 참조가 0개인 것을 확인하고 옛 오브젝트를 지웠다.
+- **주의(다음에 같은 작업을 할 때)**: 참조 교체 루프가 Transform의 내부
+  `m_Children` 목록까지 바꿔서 "Transform child is linked multiple times" /
+  "has another parent" 오류가 4건 났다. Unity가 메모리에서 정리했다. 씬을
+  디스크에서 다시 열어 계층·Prefab 연결이 맞고 콘솔 0건인 것을 확인했지만,
+  다음에는 Transform 컴포넌트는 교체 대상에서 빼야 한다.
+- 이름(Pad_ToGrabZone, Zone_TestHandOver, Zone_TestScan 등)은 그대로 두었다.
+
+### 검증
+
+- EditMode 56개 통과. 다시 연 TestMap_Quest에서 Missing Script 0, GatePassVR
+  컴포넌트 Missing Reference 0, 콘솔 Error·Warning 0.
+- 시뮬레이터 Play: 새 Pad Prefab에 Ray가 맞았고 게이지가 세 번 모두 1.00까지
+  찼다. T1 → H1(건네기) → H2(자동 반환 후 집기) → S1·S2(스캔) → T2 → T3 →
+  완료 문구, 강조 Off. 콘솔 Error 0건.
+- **미검증**: Quest 실기기. Airport_Lee 적용(이씨 씬).
+
 ## 2026-11-23 — HighlightController 구현
 
 브랜치 `feature/kim-highlight`. §13-9(약 5초 무반응 시 목표를 더 명확히
