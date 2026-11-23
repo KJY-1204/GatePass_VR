@@ -90,3 +90,21 @@ TestMap_Quest Pad에 직접 연결된 MoveTo·SetMainText·SetGoal을 Step 데�
 4. TestMap_Quest가 Step 데이터만으로 기존과 같은 순서·문구·화살표·이동을 한다 → 시뮬레이터 Play.
 5. B 버튼 Reset 시 현재 Step 안내가 다시 표시되고, 완료 후 Reset 시 첫 Step부터 다시 시작한다 → Play.
 6. Compile Error 0, EditMode 전체 통과.
+
+## 현재 작업 (2026-11-23) — Hand-over (`HandOverZone`)
+
+이씨 문구표 S2-1·S8-1(초록 칸에 여권을 놓아 건네기)과 S8-2(책상 위 여권을 다시 집기)에 맞춘다.
+
+동작:
+- 받는 물건이 전달 영역에 들어오면(손에 든 채여도) 성공 1회 → 손에서 놓게 하고 `receivePoint`(직원 쪽)로 옮겨 고정.
+- 받지 않는 물건이 들어오면 `onWrongObject` 1회(들어올 때마다), 성공 처리하지 않음.
+- `returnPoint`가 있으면 `returnDelay`초 뒤 그 자리에 다시 놓고 잡기 허용 → 사용자가 집으면 `onReturnTaken` 1회.
+- ScenarioManager는 건네기 성공을 `zoneId`, 돌려받기를 `zoneId + "_Returned"`로 받는다.
+- `ResetZone()`으로 처음 상태. ResetController에 Hand-over 영역 등록.
+
+완료 기준:
+1. 지정 물건만 성공, 틀린 물건은 WrongObject만, 성공 1회, 반환 전 집기 무시, 반환 후 집기 1회, Reset → EditMode 테스트.
+2. TestMap_Quest Grab → Hand-over → Step 성공 → Guide 갱신 → 돌려받기 → 다음 Step → 시뮬레이터 Play.
+3. 틀린 물건(GrabSphere)을 넣어도 진행되지 않는다 → Play.
+4. Hand-over 후 B 버튼 Reset 시 물건이 원위치로 돌아가 다시 시도할 수 있다 → Play.
+5. Compile Error 0, EditMode 전체 통과.
