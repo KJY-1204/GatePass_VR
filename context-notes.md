@@ -2,6 +2,53 @@
 
 결정 사항과 이유를 시간순으로 누적 기록한다. 완료된 내용을 삭제하지 않는다.
 
+## 2026-11-23 — `_GatePassVR/Scenes` 전체 3개 씬 Play 테스트
+
+코드·씬·설정 변경 없음. 세 씬 모두 Play 중 콘솔 Error 0건이었다. 템플릿
+씬인 `Assets/Scenes/SampleScene`은 제외했다. 물건 배치와 hover 강제는
+MCP `execute_code`로 했고, 실제 손으로 Grab한 것은 아니다.
+
+### Airport_Lee (이씨 담당)
+
+- 구성: PlacementZone 5개, NpcStation 4개, FadeMoveController 1개
+  (`SceneTransitionManager`), DestinationPoints 7개, 씬 안에 XR Device
+  Simulator가 들어 있다. `PointAndHoldTarget`과 `GuideManager`는 없어서
+  Point & Hold 이동과 Guide는 아직 연결되지 않았다.
+- Fade 이동: `MoveTo`로 Dest 7곳을 모두 이동했고 위치 오차 0이다.
+  alpha가 1일 때 이동했고, 모든 지점 바로 아래에 바닥 Collider가 있다.
+- PlacementZone 판정 5곳 모두 통과했다. 틀린 물건(탑승권을 수하물 영역에
+  놓음)은 WRONG 1회만 발생하고 성공하지 않았다. 맞는 물건은 PLACED 1회
+  발생 후 고정(kinematic, Grab 비활성)되었다. `ResetZone()`을 부르면
+  고정이 풀린다(kinematic=false, Grab 활성).
+- 주의 1: 5개 영역의 `onPlaced`/`onWrongObject` Persistent Listener가
+  0개다. 판정은 되지만 진행 흐름에는 아직 연결되지 않았다.
+- 주의 2: `ResetZone()` 후 물건이 영역 안에 그대로 있으면 바로 다시
+  PLACED된다. 물건 위치 복구는 ResetController 몫이다(코드 주석과 같음).
+- 주의 3: XR Origin 시작 위치가 Dest_Start(-15.1, 0.4, -36.6)가 아니라
+  XRI 데모 오브젝트 근처(-1.17, 0, 0.84)다.
+- 주의 4: `Npc_BoardingStaff_Boarding`의 interactionPoint
+  `Zone_Scan_Boarding`에는 PlacementZone이 없다(Scanner 미구현).
+- Play 종료 후 씬이 dirty로 표시되었다. Undo 기록은 "Driving
+  RectTransform"(Canvas가 자동으로 다시 계산한 값)과 "Disable Picking
+  GameObject"(에디터 상태)뿐이어서 저장하지 않고 씬을 전환했다. 디스크의
+  씬 파일은 변경 없다.
+
+### TestMap_Quest
+
+- 아래 항목과 같은 방법(런타임 시뮬레이터)으로 자동 드라이버를 돌렸다.
+  Pad 3개 한 바퀴의 Ray, 게이지, Fade 이동, Guide 갱신이 모두 통과했다.
+- 두 바퀴째 진행 불능을 다시 재현했다. Pad_ToGrabZone이 hovered인데
+  completed=True에 머물러 5초 동안 이동하지 않았다.
+
+### SmokeTest_PointHoldFade
+
+- XR Rig과 Interactor가 없는 컴포넌트 단위 씬이라 Ray 테스트는 불가했다.
+  hover를 코드로 켜서 확인했다. 게이지가 0.5초(`holdDuration=0.5`)에 완료되고,
+  alpha가 1일 때 PlayerOrigin이 WaypointB(5, 0, 3)로 이동한 뒤 Fade In되었다.
+- Main Camera가 PlayerOrigin의 자식이 아니라서 이동해도 화면 시점은
+  그대로다. 원래 의도된 최소 구성이지만, 이 씬으로 시점 이동은 확인할 수
+  없다.
+
 ## 2026-11-23 — `TestMap_Quest` XR Device Simulator 수직 슬라이스 검증 (Reset 미검증, 버그 3건 발견)
 
 코드·씬·설정 변경 없음. 검증만 수행했다.
